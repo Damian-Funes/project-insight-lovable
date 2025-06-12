@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const activityFormSchema = z.object({
   data_registro: z.date({
@@ -41,6 +42,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
   const updateMutation = useUpdateActivity();
   const { data: projects = [] } = useProjects();
   const { data: areas = [] } = useAreas();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof activityFormSchema>>({
     resolver: zodResolver(activityFormSchema),
@@ -55,30 +57,95 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
   });
 
   const onSubmit = async (values: z.infer<typeof activityFormSchema>) => {
-    const formData: ActivityFormData = {
-      data_registro: values.data_registro,
-      projeto_id: values.projeto_id,
-      area_id: values.area_id,
-      horas_gastas: values.horas_gastas,
-      descricao_atividade: values.descricao_atividade,
-      tipo_atividade: values.tipo_atividade,
-      responsavel_id: "00000000-0000-0000-0000-000000000000", // Placeholder - seria o ID do usuário logado
-    };
+    try {
+      // Validação adicional dos campos obrigatórios
+      if (!values.data_registro) {
+        toast({
+          title: "Erro de Validação",
+          description: "Data do registro é obrigatória.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (mode === "edit" && activity) {
-      await updateMutation.mutateAsync({ id: activity.id, data: formData });
-    } else {
-      await createMutation.mutateAsync(formData);
+      if (!values.projeto_id) {
+        toast({
+          title: "Erro de Validação",
+          description: "Projeto é obrigatório.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!values.area_id) {
+        toast({
+          title: "Erro de Validação",
+          description: "Área é obrigatória.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!values.horas_gastas || values.horas_gastas <= 0) {
+        toast({
+          title: "Erro de Validação",
+          description: "Horas gastas deve ser maior que 0.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const formData: ActivityFormData = {
+        data_registro: values.data_registro,
+        projeto_id: values.projeto_id,
+        area_id: values.area_id,
+        horas_gastas: values.horas_gastas,
+        descricao_atividade: values.descricao_atividade,
+        tipo_atividade: values.tipo_atividade,
+        responsavel_id: "00000000-0000-0000-0000-000000000000", // Placeholder - seria o ID do usuário logado
+      };
+
+      if (mode === "edit" && activity) {
+        await updateMutation.mutateAsync({ id: activity.id, data: formData });
+        toast({
+          title: "Sucesso!",
+          description: "Atividade atualizada com sucesso.",
+        });
+      } else {
+        await createMutation.mutateAsync(formData);
+        toast({
+          title: "Sucesso!",
+          description: "Atividade registrada com sucesso.",
+        });
+      }
+
+      // Limpar o formulário após sucesso
+      form.reset({
+        data_registro: new Date(),
+        projeto_id: "",
+        area_id: "",
+        horas_gastas: 0,
+        descricao_atividade: "",
+        tipo_atividade: "Padrão",
+      });
+      
+      onClose();
+    } catch (error: any) {
+      console.error("Erro ao processar atividade:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao processar atividade. Tente novamente.",
+        variant: "destructive",
+      });
     }
-
-    form.reset();
-    onClose();
   };
 
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
+  const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -97,7 +164,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
                 name="data_registro"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Data do Registro</FormLabel>
+                    <FormLabel>Data do Registro *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -139,7 +206,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
                 name="horas_gastas"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Horas Gastas</FormLabel>
+                    <FormLabel>Horas Gastas *</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -161,8 +228,8 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
                 name="projeto_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Projeto</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Projeto *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o projeto" />
@@ -186,8 +253,8 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
                 name="area_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Área Produtiva</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Área Produtiva *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a área" />
@@ -213,7 +280,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Atividade</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo" />
@@ -248,14 +315,15 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
             />
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
+                disabled={isLoading}
+                className="bg-chart-primary hover:bg-chart-primary/90"
               >
-                {mode === "edit" ? "Atualizar" : "Registrar"} Atividade
+                {isLoading ? "Processando..." : mode === "edit" ? "Atualizar" : "Registrar"} Atividade
               </Button>
             </div>
           </form>
