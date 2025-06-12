@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -28,30 +28,11 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = React.memo(({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Função não-bloqueante para verificar alertas pendentes (memoizada)
-  const checkPendingAlertsAsync = useCallback(async (userId: string) => {
-    try {
-      console.log('Verificando alertas pendentes em background para:', userId);
-      const { error } = await supabase.rpc('check_pending_alerts_on_login', {
-        user_id: userId
-      });
-      
-      if (error) {
-        console.error('Erro ao verificar alertas pendentes:', error);
-      } else {
-        console.log('Verificação de alertas pendentes executada com sucesso');
-      }
-    } catch (error) {
-      console.error('Erro ao executar verificação de alertas:', error);
-    }
-  }, []);
-
-  // Memoizar funções de autenticação
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -95,7 +76,6 @@ export const AuthProvider = React.memo(({ children }: { children: React.ReactNod
   useEffect(() => {
     let isMounted = true;
 
-    // Configurar listener primeiro
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -104,16 +84,9 @@ export const AuthProvider = React.memo(({ children }: { children: React.ReactNod
       console.log('Auth state changed:', event, !!session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      // Verificar alertas pendentes em background (não-bloqueante)
-      if (event === 'SIGNED_IN' && session?.user) {
-        setTimeout(() => {
-          checkPendingAlertsAsync(session.user.id);
-        }, 100);
-      }
     });
 
-    // Verificar sessão inicial com timeout
+    // Verificar sessão inicial
     const initAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -125,13 +98,6 @@ export const AuthProvider = React.memo(({ children }: { children: React.ReactNod
         }
 
         setUser(session?.user ?? null);
-        
-        // Se há usuário logado, verificar alertas em background
-        if (session?.user) {
-          setTimeout(() => {
-            checkPendingAlertsAsync(session.user.id);
-          }, 100);
-        }
       } catch (error) {
         console.error('Erro na inicialização da auth:', error);
       } finally {
@@ -141,7 +107,7 @@ export const AuthProvider = React.memo(({ children }: { children: React.ReactNod
       }
     };
 
-    // Timeout de segurança para evitar carregamento infinito
+    // Timeout de segurança
     const timeoutId = setTimeout(() => {
       if (isMounted && loading) {
         console.warn('Timeout na autenticação - definindo loading como false');
@@ -156,22 +122,19 @@ export const AuthProvider = React.memo(({ children }: { children: React.ReactNod
       clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
-  }, [checkPendingAlertsAsync, loading]);
+  }, [loading]);
 
-  // Memoizar o valor do contexto para evitar re-renders desnecessários
-  const value = useMemo(() => ({
+  const value = {
     user,
     loading,
     signIn,
     signUp,
     signOut,
-  }), [user, loading, signIn, signUp, signOut]);
+  };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-});
-
-AuthProvider.displayName = 'AuthProvider';
+};
