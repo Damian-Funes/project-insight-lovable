@@ -43,7 +43,8 @@ export const ProtectedLayout = () => {
   }
 
   return (
-    <VisualIdentityGuard>
+    <>
+      <VisualIdentityGuard />
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
@@ -78,6 +79,6 @@ export const ProtectedLayout = () => {
           </main>
         </div>
       </SidebarProvider>
-    </VisualIdentityGuard>
+    </>
   );
 };
