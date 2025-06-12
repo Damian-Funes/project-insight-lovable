@@ -3,12 +3,22 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { FolderOpen, Plus, DollarSign, Clock, Users, TrendingUp, Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { useCreateProject, useUpdateProject, useDeleteProject } from "@/hooks/useProjectMutations";
+import { ProjectFormModal, type ProjectFormData } from "@/components/ProjectFormModal";
+import { useState } from "react";
 
 const Projects = () => {
   const { data: projects, isLoading, error } = useProjects();
+  const createProject = useCreateProject();
+  const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -29,6 +39,42 @@ const Projects = () => {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Não definido";
     return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleCreateProject = () => {
+    setEditingProject(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditProject = (project: any) => {
+    setEditingProject({
+      ...project,
+      data_inicio: project.data_inicio ? new Date(project.data_inicio) : undefined,
+      data_termino_prevista: project.data_termino_prevista ? new Date(project.data_termino_prevista) : undefined,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (data: ProjectFormData) => {
+    try {
+      if (editingProject) {
+        await updateProject.mutateAsync({ id: editingProject.id, data });
+      } else {
+        await createProject.mutateAsync(data);
+      }
+      setIsModalOpen(false);
+      setEditingProject(null);
+    } catch (error) {
+      console.error("Erro ao salvar projeto:", error);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deleteProject.mutateAsync(id);
+    } catch (error) {
+      console.error("Erro ao excluir projeto:", error);
+    }
   };
 
   if (isLoading) {
@@ -64,128 +110,119 @@ const Projects = () => {
           <SidebarTrigger />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Gestão de Projetos</h1>
-            <p className="text-muted-foreground">Acompanhe o progresso e custos dos projetos</p>
+            <p className="text-muted-foreground">Gerencie todos os projetos da empresa</p>
           </div>
         </div>
-        <Button className="bg-chart-primary hover:bg-chart-primary/90">
+        <Button 
+          onClick={handleCreateProject}
+          className="bg-chart-primary hover:bg-chart-primary/90"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Novo Projeto
         </Button>
       </div>
 
-      {/* Projects Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {projects?.map((project) => (
-          <Card key={project.id} className="metric-card">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-chart-primary to-chart-secondary rounded-lg flex items-center justify-center">
-                    <FolderOpen className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-foreground">{project.nome_projeto}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{project.descricao_projeto || "Sem descrição"}</p>
-                  </div>
-                </div>
-                <Badge variant="outline" className={getStatusColor(project.status_projeto)}>
-                  {project.status_projeto}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Progress Bar */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Utilização do Orçamento</span>
-                  <span className="text-foreground font-medium">{project.progress}%</span>
-                </div>
-                <Progress 
-                  value={project.progress} 
-                  className="h-2"
-                />
-              </div>
+      <Card className="metric-card">
+        <CardHeader>
+          <CardTitle>Lista de Projetos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {projects && projects.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome do Projeto</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Data de Início</TableHead>
+                  <TableHead>Orçamento Total</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {projects.map((project) => (
+                  <TableRow key={project.id}>
+                    <TableCell className="font-medium">
+                      <div>
+                        <p className="font-semibold">{project.nome_projeto}</p>
+                        {project.descricao_projeto && (
+                          <p className="text-sm text-muted-foreground">
+                            {project.descricao_projeto}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={getStatusColor(project.status_projeto)}>
+                        {project.status_projeto}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{formatDate(project.data_inicio)}</TableCell>
+                    <TableCell>
+                      {project.orcamento_total ? formatCurrency(project.orcamento_total) : "Não definido"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProject(project)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir o projeto "{project.nome_projeto}"? 
+                                Esta ação não pode ser desfeita e todos os registros de atividades 
+                                relacionados também serão removidos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteProject(project.id)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">Nenhum projeto encontrado</p>
+              <Button 
+                onClick={handleCreateProject}
+                className="bg-chart-primary hover:bg-chart-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Primeiro Projeto
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-              {/* Key Metrics */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-metric-revenue" />
-                    <span className="text-sm text-muted-foreground">Orçamento</span>
-                  </div>
-                  <p className="text-lg font-bold text-foreground">
-                    {formatCurrency(project.budget)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Gasto: {formatCurrency(project.spent)}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-metric-efficiency" />
-                    <span className="text-sm text-muted-foreground">Horas</span>
-                  </div>
-                  <p className="text-lg font-bold text-foreground">
-                    {project.totalHours.toFixed(1)}h
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    registradas
-                  </p>
-                </div>
-              </div>
-
-              {/* Project Dates */}
-              <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
-                <div>
-                  <span className="block">Início</span>
-                  <span className="font-medium text-foreground">
-                    {formatDate(project.data_inicio)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block">Prazo</span>
-                  <span className="font-medium text-foreground">
-                    {formatDate(project.data_termino_prevista)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Cost Efficiency Indicator */}
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="text-sm text-muted-foreground">Status Financeiro</span>
-                <div className="flex items-center space-x-1">
-                  <TrendingUp className={`w-4 h-4 ${
-                    project.progress <= 80 ? "text-metric-profit" : 
-                    project.progress <= 100 ? "text-metric-warning" : "text-metric-cost"
-                  }`} />
-                  <span className={`text-sm font-medium ${
-                    project.progress <= 80 ? "text-metric-profit" : 
-                    project.progress <= 100 ? "text-metric-warning" : "text-metric-cost"
-                  }`}>
-                    {project.progress <= 80 ? "Dentro do orçamento" : 
-                     project.progress <= 100 ? "Próximo do limite" : "Excedeu orçamento"}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {projects && projects.length === 0 && (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum projeto encontrado</h3>
-            <p className="text-muted-foreground mb-4">Comece criando seu primeiro projeto</p>
-            <Button className="bg-chart-primary hover:bg-chart-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Projeto
-            </Button>
-          </div>
-        </div>
-      )}
+      <ProjectFormModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleSubmit}
+        initialData={editingProject}
+        isLoading={createProject.isPending || updateProject.isPending}
+      />
     </div>
   );
 };
