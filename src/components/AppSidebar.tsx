@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -12,9 +13,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt, Activity } from "lucide-react";
+import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt, Activity, Bell } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "./NotificationBell";
 
 const menuItems = [
   {
@@ -62,6 +64,11 @@ const menuItems = [
     url: "/financial-projection",
     icon: TrendingUp,
   },
+  {
+    title: "Configuração de Alertas",
+    url: "/alerts-configuration",
+    icon: Bell,
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -75,14 +82,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-chart-primary to-chart-secondary rounded-lg flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-chart-primary to-chart-secondary rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-sidebar-foreground">FinPlan</h1>
+              <p className="text-xs text-sidebar-foreground/60">Planejamento Estratégico</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-sidebar-foreground">FinPlan</h1>
-            <p className="text-xs text-sidebar-foreground/60">Planejamento Estratégico</p>
-          </div>
+          <NotificationBell />
         </div>
       </SidebarHeader>
       
