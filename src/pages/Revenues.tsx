@@ -54,10 +54,10 @@ export default function Revenues() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "Venda de Serviço": return "bg-blue-100 text-blue-800";
-      case "Venda de Produto": return "bg-green-100 text-green-800";
-      case "Outros": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Venda de Serviço": return "bg-chart-primary/20 text-chart-primary border-chart-primary/50";
+      case "Venda de Produto": return "bg-chart-tertiary/20 text-chart-tertiary border-chart-tertiary/50";
+      case "Outros": return "bg-muted text-muted-foreground border-border";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -65,12 +65,12 @@ export default function Revenues() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Receitas</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Receitas</h1>
           <p className="text-muted-foreground">
             Gerencie as receitas dos seus projetos
           </p>
         </div>
-        <Button onClick={handleNewRevenue} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+        <Button onClick={handleNewRevenue} className="bg-gradient-to-r from-chart-primary to-accent hover:opacity-90">
           <Plus className="mr-2 h-4 w-4" />
           Nova Receita
         </Button>
@@ -78,18 +78,18 @@ export default function Revenues() {
 
       {/* Resumo */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+        <Card className="metric-card border-chart-tertiary/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
+            <CardTitle className="text-sm font-medium text-chart-tertiary">
               Total de Receitas
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <DollarSign className="h-4 w-4 text-chart-tertiary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800">
+            <div className="text-2xl font-bold text-chart-tertiary">
               R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-green-600">
+            <p className="text-xs text-muted-foreground">
               {filteredRevenues.length} receita(s) encontrada(s)
             </p>
           </CardContent>
@@ -97,9 +97,9 @@ export default function Revenues() {
       </div>
 
       {/* Filtros */}
-      <Card>
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+          <CardTitle className="text-foreground">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
@@ -110,7 +110,7 @@ export default function Revenues() {
                   placeholder="Buscar receitas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-input border-border text-foreground"
                 />
               </div>
             </div>
@@ -127,13 +127,13 @@ export default function Revenues() {
       </Card>
 
       {/* Lista de Receitas */}
-      <Card>
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle>Lista de Receitas</CardTitle>
+          <CardTitle className="text-foreground">Lista de Receitas</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-4">Carregando receitas...</div>
+            <div className="text-center py-4 text-muted-foreground">Carregando receitas...</div>
           ) : filteredRevenues.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Nenhuma receita encontrada.
@@ -143,11 +143,11 @@ export default function Revenues() {
               {filteredRevenues.map((revenue) => (
                 <div
                   key={revenue.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-dashboard-cardHover transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">
+                      <h3 className="font-semibold text-foreground">
                         {revenue.projetos?.nome_projeto || "Projeto não encontrado"}
                       </h3>
                       {revenue.tipo_receita && (
@@ -160,7 +160,7 @@ export default function Revenues() {
                       {revenue.descricao_receita || "Sem descrição"}
                     </p>
                     <div className="flex items-center gap-4 text-sm">
-                      <span className="text-green-600 font-medium">
+                      <span className="text-chart-tertiary font-medium">
                         R$ {Number(revenue.valor_receita).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                       <span className="text-muted-foreground">
@@ -173,6 +173,7 @@ export default function Revenues() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(revenue)}
+                      className="border-border hover:bg-accent"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -180,7 +181,7 @@ export default function Revenues() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(revenue.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="border-border text-destructive hover:text-destructive-foreground hover:bg-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
