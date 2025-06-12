@@ -2,45 +2,47 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Plus, Save } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Calendar, Clock, Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { ActivityFormModal } from "@/components/ActivityFormModal";
+import { useActivities } from "@/hooks/useActivities";
+import { useDeleteActivity } from "@/hooks/useActivityMutations";
+import { format } from "date-fns";
 
 const Activities = () => {
-  const [activities] = useState([
-    {
-      id: 1,
-      date: "2024-06-12",
-      project: "Projeto Alpha",
-      area: "Desenvolvimento",
-      hours: 4.5,
-      type: "Padrão",
-      description: "Implementação da API de autenticação"
-    },
-    {
-      id: 2,
-      date: "2024-06-12",
-      project: "Projeto Beta",
-      area: "Design",
-      hours: 3.0,
-      type: "Retrabalho",
-      description: "Revisão das telas de dashboard"
-    },
-    {
-      id: 3,
-      date: "2024-06-11",
-      project: "Projeto Gamma",
-      area: "QA",
-      hours: 6.0,
-      type: "Padrão",
-      description: "Testes automatizados para módulo de relatórios"
-    }
-  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+
+  const { data: activities = [], isLoading } = useActivities();
+  const deleteMutation = useDeleteActivity();
+
+  const handleNewActivity = () => {
+    setSelectedActivity(null);
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
+  const handleEditActivity = (activity: any) => {
+    setSelectedActivity(activity);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteActivity = async (id: string) => {
+    await deleteMutation.mutateAsync(id);
+  };
+
+  const totalHoursToday = activities
+    .filter(activity => {
+      const activityDate = new Date(activity.data_registro);
+      const today = new Date();
+      return activityDate.toDateString() === today.toDateString();
+    })
+    .reduce((sum, activity) => sum + Number(activity.horas_gastas), 0);
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -52,154 +54,131 @@ const Activities = () => {
             <p className="text-muted-foreground">Registre as horas trabalhadas em projetos</p>
           </div>
         </div>
-        <Badge variant="outline" className="bg-chart-primary/10 text-chart-primary border-chart-primary">
-          <Clock className="w-3 h-3 mr-1" />
-          Hoje: 7.5h registradas
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <Badge variant="outline" className="bg-chart-primary/10 text-chart-primary border-chart-primary">
+            <Clock className="w-3 h-3 mr-1" />
+            Hoje: {totalHoursToday.toFixed(1)}h registradas
+          </Badge>
+          <Button onClick={handleNewActivity} className="bg-chart-primary hover:bg-chart-primary/90">
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Atividade
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Activity Registration Form */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Plus className="w-5 h-5 text-chart-primary" />
-              <span>Nova Atividade</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Input 
-                id="date" 
-                type="date" 
-                defaultValue="2024-06-12"
-                className="bg-input border-border"
-              />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Calendar className="w-5 h-5 text-chart-secondary" />
+            <span>Atividades Registradas</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <div className="text-muted-foreground">Carregando atividades...</div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="project">Projeto</Label>
-              <Select>
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Selecione o projeto" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="alpha">Projeto Alpha</SelectItem>
-                  <SelectItem value="beta">Projeto Beta</SelectItem>
-                  <SelectItem value="gamma">Projeto Gamma</SelectItem>
-                  <SelectItem value="delta">Projeto Delta</SelectItem>
-                </SelectContent>
-              </Select>
+          ) : activities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma atividade registrada</h3>
+              <p className="text-muted-foreground mb-4">Comece registrando sua primeira atividade.</p>
+              <Button onClick={handleNewActivity} className="bg-chart-primary hover:bg-chart-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                Registrar Primeira Atividade
+              </Button>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="area">Área Produtiva</Label>
-              <Select>
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Selecione a área" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="dev">Desenvolvimento</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="qa">QA</SelectItem>
-                  <SelectItem value="devops">DevOps</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="hours">Horas Trabalhadas</Label>
-              <Input 
-                id="hours" 
-                type="number" 
-                step="0.5" 
-                placeholder="Ex: 4.5"
-                className="bg-input border-border"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="type">Tipo de Atividade</Label>
-              <Select>
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="standard">Padrão</SelectItem>
-                  <SelectItem value="rework">Retrabalho</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea 
-                id="description"
-                placeholder="Descreva brevemente a atividade realizada..."
-                className="bg-input border-border min-h-[80px]"
-              />
-            </div>
-
-            <Button className="w-full bg-chart-primary hover:bg-chart-primary/90">
-              <Save className="w-4 h-4 mr-2" />
-              Registrar Atividade
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5 text-chart-secondary" />
-              <span>Atividades Recentes</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border hover:bg-muted/50">
-                  <TableHead className="text-muted-foreground">Data</TableHead>
-                  <TableHead className="text-muted-foreground">Projeto</TableHead>
-                  <TableHead className="text-muted-foreground">Área</TableHead>
-                  <TableHead className="text-muted-foreground">Horas</TableHead>
-                  <TableHead className="text-muted-foreground">Tipo</TableHead>
-                  <TableHead className="text-muted-foreground">Descrição</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activities.map((activity) => (
-                  <TableRow key={activity.id} className="border-border hover:bg-muted/50">
-                    <TableCell className="text-foreground">
-                      {new Date(activity.date).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground">
-                      {activity.project}
-                    </TableCell>
-                    <TableCell className="text-foreground">{activity.area}</TableCell>
-                    <TableCell className="text-foreground">{activity.hours}h</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={activity.type === "Padrão" ? "default" : "destructive"}
-                        className={activity.type === "Padrão" 
-                          ? "bg-metric-profit/10 text-metric-profit border-metric-profit" 
-                          : "bg-metric-cost/10 text-metric-cost border-metric-cost"
-                        }
-                      >
-                        {activity.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {activity.description}
-                    </TableCell>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border hover:bg-muted/50">
+                    <TableHead className="text-muted-foreground">Data</TableHead>
+                    <TableHead className="text-muted-foreground">Projeto</TableHead>
+                    <TableHead className="text-muted-foreground">Área</TableHead>
+                    <TableHead className="text-muted-foreground">Horas</TableHead>
+                    <TableHead className="text-muted-foreground">Tipo</TableHead>
+                    <TableHead className="text-muted-foreground">Descrição</TableHead>
+                    <TableHead className="text-muted-foreground">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+                </TableHeader>
+                <TableBody>
+                  {activities.map((activity) => (
+                    <TableRow key={activity.id} className="border-border hover:bg-muted/50">
+                      <TableCell className="text-foreground">
+                        {format(new Date(activity.data_registro), "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        {activity.projetos?.nome_projeto || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-foreground">
+                        {activity.areas_produtivas?.nome_area || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-foreground">{activity.horas_gastas}h</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={activity.tipo_atividade === "Padrão" ? "default" : "destructive"}
+                          className={activity.tipo_atividade === "Padrão" 
+                            ? "bg-metric-profit/10 text-metric-profit border-metric-profit" 
+                            : "bg-metric-cost/10 text-metric-cost border-metric-cost"
+                          }
+                        >
+                          {activity.tipo_atividade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground max-w-xs truncate">
+                        {activity.descricao_atividade || "Sem descrição"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditActivity(activity)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteActivity(activity.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <ActivityFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        activity={selectedActivity}
+        mode={modalMode}
+      />
     </div>
   );
 };
