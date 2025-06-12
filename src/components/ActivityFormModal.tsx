@@ -1,16 +1,15 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { useCreateActivity, useUpdateActivity, type ActivityFormData } from "@/hooks/useActivityMutations";
 import { useProjects } from "@/hooks/useProjects";
 import { useAreas } from "@/hooks/useAreas";
-import { useOrdemProducao } from "@/hooks/useOrdemProducao";
 import { useToast } from "@/hooks/use-toast";
 import { ActivityFormFields } from "./ActivityFormFields";
 import { ActivityFormButtons } from "./ActivityFormButtons";
-import { useOptimizedForm } from "@/hooks/useOptimizedForm";
-import { memo, useMemo } from "react";
 
 const activityFormSchema = z.object({
   data_registro: z.date({
@@ -21,7 +20,6 @@ const activityFormSchema = z.object({
   horas_gastas: z.coerce.number().min(0.1, "Horas gastas deve ser maior que 0"),
   descricao_atividade: z.string().optional(),
   tipo_atividade: z.enum(["Padrão", "Retrabalho"]),
-  ordem_producao_id: z.string().optional(),
 });
 
 interface ActivityFormModalProps {
@@ -31,30 +29,23 @@ interface ActivityFormModalProps {
   mode: "create" | "edit";
 }
 
-export const ActivityFormModal = memo(({ isOpen, onClose, activity, mode }: ActivityFormModalProps) => {
+export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityFormModalProps) => {
   const createMutation = useCreateActivity();
   const updateMutation = useUpdateActivity();
   const { data: projects = [] } = useProjects();
   const { data: areas = [] } = useAreas();
-  const { ordensProducao = [] } = useOrdemProducao();
   const { toast } = useToast();
 
-  // Valores padrão otimizados com memoização
-  const defaultValues = useMemo(() => ({
-    data_registro: activity ? new Date(activity.data_registro) : new Date(),
-    projeto_id: activity?.projeto_id || "",
-    area_id: activity?.area_id || "",
-    horas_gastas: activity?.horas_gastas || 0,
-    descricao_atividade: activity?.descricao_atividade || "",
-    tipo_atividade: activity?.tipo_atividade || "Padrão" as const,
-    ordem_producao_id: activity?.ordem_producao_id || "",
-  }), [activity]);
-
-  const form = useOptimizedForm<z.infer<typeof activityFormSchema>>({
+  const form = useForm<z.infer<typeof activityFormSchema>>({
     resolver: zodResolver(activityFormSchema),
-    defaultValues,
-    mode: "onChange",
-    reValidateMode: "onChange",
+    defaultValues: {
+      data_registro: activity ? new Date(activity.data_registro) : new Date(),
+      projeto_id: activity?.projeto_id || "",
+      area_id: activity?.area_id || "",
+      horas_gastas: activity?.horas_gastas || 0,
+      descricao_atividade: activity?.descricao_atividade || "",
+      tipo_atividade: activity?.tipo_atividade || "Padrão",
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof activityFormSchema>) => {
@@ -104,7 +95,6 @@ export const ActivityFormModal = memo(({ isOpen, onClose, activity, mode }: Acti
         descricao_atividade: values.descricao_atividade,
         tipo_atividade: values.tipo_atividade,
         responsavel_id: "00000000-0000-0000-0000-000000000000", // Placeholder - seria o ID do usuário logado
-        ordem_producao_id: values.ordem_producao_id || undefined,
       };
 
       if (mode === "edit" && activity) {
@@ -121,7 +111,16 @@ export const ActivityFormModal = memo(({ isOpen, onClose, activity, mode }: Acti
         });
       }
 
-      form.reset();
+      // Limpar o formulário após sucesso
+      form.reset({
+        data_registro: new Date(),
+        projeto_id: "",
+        area_id: "",
+        horas_gastas: 0,
+        descricao_atividade: "",
+        tipo_atividade: "Padrão",
+      });
+      
       onClose();
     } catch (error: any) {
       console.error("Erro ao processar atividade:", error);
@@ -154,8 +153,7 @@ export const ActivityFormModal = memo(({ isOpen, onClose, activity, mode }: Acti
             <ActivityFormFields 
               control={form.control} 
               projects={projects} 
-              areas={areas}
-              ordensProducao={ordensProducao}
+              areas={areas} 
             />
             <ActivityFormButtons 
               onCancel={handleClose} 
@@ -167,8 +165,6 @@ export const ActivityFormModal = memo(({ isOpen, onClose, activity, mode }: Acti
       </DialogContent>
     </Dialog>
   );
-});
-
-ActivityFormModal.displayName = "ActivityFormModal";
+};
 
 export type { ActivityFormData };

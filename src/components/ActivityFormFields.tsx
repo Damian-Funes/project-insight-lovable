@@ -1,6 +1,6 @@
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { OptimizedInput } from "@/components/forms/OptimizedInput";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -11,7 +11,6 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Control } from "react-hook-form";
 import { z } from "zod";
-import { memo } from "react";
 
 const activityFormSchema = z.object({
   data_registro: z.date({
@@ -22,17 +21,15 @@ const activityFormSchema = z.object({
   horas_gastas: z.coerce.number().min(0.1, "Horas gastas deve ser maior que 0"),
   descricao_atividade: z.string().optional(),
   tipo_atividade: z.enum(["Padrão", "Retrabalho"]),
-  ordem_producao_id: z.string().optional(),
 });
 
 interface ActivityFormFieldsProps {
   control: Control<z.infer<typeof activityFormSchema>>;
   projects: any[];
   areas: any[];
-  ordensProducao: any[];
 }
 
-export const ActivityFormFields = memo(({ control, projects, areas, ordensProducao }: ActivityFormFieldsProps) => {
+export const ActivityFormFields = ({ control, projects, areas }: ActivityFormFieldsProps) => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -85,12 +82,11 @@ export const ActivityFormFields = memo(({ control, projects, areas, ordensProduc
             <FormItem>
               <FormLabel>Horas Gastas *</FormLabel>
               <FormControl>
-                <OptimizedInput
+                <Input
                   type="number"
                   step="0.5"
                   min="0"
                   placeholder="Ex: 4.5"
-                  debounceMs={300}
                   {...field}
                 />
               </FormControl>
@@ -152,55 +148,27 @@ export const ActivityFormFields = memo(({ control, projects, areas, ordensProduc
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={control}
-          name="tipo_atividade"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Atividade</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Padrão">Padrão</SelectItem>
-                  <SelectItem value="Retrabalho">Retrabalho</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="ordem_producao_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ordem de Produção (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma OP (opcional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="">Nenhuma OP selecionada</SelectItem>
-                  {ordensProducao?.map((op) => (
-                    <SelectItem key={op.id} value={op.id}>
-                      {op.numero_op} - {op.projetos?.nome_projeto}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={control}
+        name="tipo_atividade"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de Atividade</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Padrão">Padrão</SelectItem>
+                <SelectItem value="Retrabalho">Retrabalho</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <FormField
         control={control}
@@ -221,6 +189,4 @@ export const ActivityFormFields = memo(({ control, projects, areas, ordensProduc
       />
     </>
   );
-});
-
-ActivityFormFields.displayName = "ActivityFormFields";
+};

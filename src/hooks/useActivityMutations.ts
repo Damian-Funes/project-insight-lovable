@@ -11,7 +11,6 @@ export interface ActivityFormData {
   descricao_atividade?: string;
   tipo_atividade: 'Padrão' | 'Retrabalho';
   responsavel_id: string;
-  ordem_producao_id?: string;
 }
 
 export const useCreateActivity = () => {
@@ -30,7 +29,6 @@ export const useCreateActivity = () => {
           descricao_atividade: data.descricao_atividade || null,
           tipo_atividade: data.tipo_atividade,
           responsavel_id: data.responsavel_id,
-          ordem_producao_id: data.ordem_producao_id || null,
         }]);
 
       if (error) {
@@ -71,7 +69,6 @@ export const useUpdateActivity = () => {
           descricao_atividade: data.descricao_atividade || null,
           tipo_atividade: data.tipo_atividade,
           responsavel_id: data.responsavel_id,
-          ordem_producao_id: data.ordem_producao_id || null,
         })
         .eq("id", id);
 

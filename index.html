@@ -8,83 +8,18 @@
     <meta name="description" content="Sistema completo de planejamento financeiro estratégico com dashboards interativos e análise de custos" />
     <meta name="author" content="FinPlan Team" />
 
-    <!-- Resource Hints para melhor performance -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Preload critical resources -->
-    <link rel="modulepreload" href="/src/main.tsx">
-    <link rel="modulepreload" href="/src/App.tsx">
-    
-    <!-- Open Graph -->
     <meta property="og:title" content="FinPlan - Planejamento Financeiro Estratégico" />
     <meta property="og:description" content="Sistema completo para gestão financeira e análise de custos por projeto" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    
-    <!-- Performance optimizations -->
-    <meta name="theme-color" content="#1a1a1a" />
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Critical CSS inline (será injetado pelo Vite) -->
-    <style>
-      /* Critical path CSS para evitar FOUC */
-      html, body {
-        margin: 0;
-        padding: 0;
-        background-color: #0a0a0a;
-        color: #fafafa;
-        font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-      }
-      
-      #root {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      /* Loading spinner para primeira renderização */
-      .initial-loader {
-        width: 50px;
-        height: 50px;
-        border: 3px solid #333;
-        border-top: 3px solid #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    </style>
   </head>
 
   <body>
-    <div id="root">
-      <!-- Loading inicial enquanto o JS carrega -->
-      <div class="initial-loader"></div>
-    </div>
-    
-    <!-- Main module - será substituído pelo Vite -->
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Service Worker para cache (futuro) -->
-    <script>
-      // Preparação para PWA
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Será implementado futuramente
-        });
-      }
-    </script>
   </body>
 </html>

@@ -1,6 +1,5 @@
 
-import React from "react";
-import { OptimizedAreaChart } from "@/components/charts/OptimizedAreaChart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -23,13 +22,75 @@ export const CostPredictionChart = ({ predictions }: CostPredictionChartProps) =
     maximo: prediction.intervalo_confianca_max ? Number(prediction.intervalo_confianca_max) : 0,
   }));
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
   return (
-    <OptimizedAreaChart
-      data={chartData}
-      dataKey="valorPrevisto"
-      xAxisKey="mes"
-      color="hsl(var(--chart-primary))"
-      maxDataPoints={12}
-    />
+    <ResponsiveContainer width="100%" height={400}>
+      <AreaChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+        <XAxis 
+          dataKey="mes" 
+          className="text-xs fill-muted-foreground"
+        />
+        <YAxis 
+          tickFormatter={formatCurrency}
+          className="text-xs fill-muted-foreground"
+        />
+        <Tooltip
+          formatter={(value: number, name: string) => [
+            formatCurrency(value),
+            name === "valorPrevisto" ? "Valor Previsto" :
+            name === "minimo" ? "Mínimo" : "Máximo"
+          ]}
+          labelFormatter={(label, payload) => {
+            if (payload && payload[0]) {
+              return format(new Date(payload[0].payload.dataCompleta), "MMMM 'de' yyyy", { locale: ptBR });
+            }
+            return label;
+          }}
+          contentStyle={{
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "6px",
+          }}
+        />
+        <Legend />
+        
+        {/* Área de confiança */}
+        <Area
+          type="monotone"
+          dataKey="maximo"
+          stackId="1"
+          stroke="hsl(var(--chart-primary))"
+          fill="hsl(var(--chart-primary))"
+          fillOpacity={0.1}
+          strokeWidth={0}
+        />
+        <Area
+          type="monotone"
+          dataKey="minimo"
+          stackId="1"
+          stroke="hsl(var(--chart-primary))"
+          fill="hsl(var(--background))"
+          fillOpacity={1}
+          strokeWidth={0}
+        />
+        
+        {/* Linha principal da previsão */}
+        <Line
+          type="monotone"
+          dataKey="valorPrevisto"
+          stroke="hsl(var(--chart-primary))"
+          strokeWidth={3}
+          dot={{ r: 4, fill: "hsl(var(--chart-primary))" }}
+          name="Valor Previsto"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 };

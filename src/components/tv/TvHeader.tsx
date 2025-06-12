@@ -1,5 +1,7 @@
 
 import { Tv } from "lucide-react";
+import { AreaFilter } from "@/components/AreaFilter";
+import { useAreas } from "@/hooks/useAreas";
 
 interface TvHeaderProps {
   selectedArea: string;
@@ -7,7 +9,11 @@ interface TvHeaderProps {
 }
 
 export const TvHeader = ({ selectedArea, onAreaChange }: TvHeaderProps) => {
-  console.log('TvHeader renderizando');
+  const { data: areas } = useAreas();
+
+  const selectedAreaName = selectedArea === "all" 
+    ? "Nenhuma Área Selecionada" 
+    : areas?.find(area => area.id === selectedArea)?.nome_area || "Área Desconhecida";
 
   return (
     <div className="flex items-center justify-between mb-12">
@@ -19,7 +25,7 @@ export const TvHeader = ({ selectedArea, onAreaChange }: TvHeaderProps) => {
               Painel Operacional
             </h1>
             <p className="text-2xl text-chart-primary font-semibold mt-2">
-              {selectedArea === "all" ? "Nenhuma Área Selecionada" : `Área: ${selectedArea}`}
+              {selectedAreaName}
             </p>
           </div>
         </div>
@@ -30,16 +36,12 @@ export const TvHeader = ({ selectedArea, onAreaChange }: TvHeaderProps) => {
           <label className="text-xl font-semibold text-foreground">
             Selecionar Área Produtiva
           </label>
-          <select
-            value={selectedArea}
-            onChange={(e) => onAreaChange(e.target.value)}
-            className="w-80 p-2 border border-border rounded bg-background text-foreground"
-          >
-            <option value="all">Todas as áreas</option>
-            <option value="area1">Área 1</option>
-            <option value="area2">Área 2</option>
-            <option value="area3">Área 3</option>
-          </select>
+          <div className="w-80">
+            <AreaFilter
+              selectedArea={selectedArea}
+              onAreaChange={onAreaChange}
+            />
+          </div>
         </div>
       </div>
     </div>

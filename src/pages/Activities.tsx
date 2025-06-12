@@ -6,71 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Plus } from "lucide-react";
 import { ActivityFormModal } from "@/components/ActivityFormModal";
-import { useActivitiesPaginated } from "@/hooks/useActivitiesPaginated";
+import { useActivities } from "@/hooks/useActivities";
 import { useDeleteActivity } from "@/hooks/useActivityMutations";
 import { OptimizedActivitiesTable } from "@/components/OptimizedActivitiesTable";
-import { ActivitiesFilters } from "@/components/ActivitiesFilters";
-import { ActivitiesPagination } from "@/components/ActivitiesPagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDebounce } from "@/hooks/useDebounce";
 
 const Activities = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  
-  // Estados de filtros
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [projectId, setProjectId] = useState("");
 
-  // Usar debounce para otimizar buscas
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const debouncedProjectId = useDebounce(projectId, 100);
-
-  // Configurar filtros padrão para os últimos 7 dias para melhor performance
-  const defaultDateFrom = useMemo(() => {
-    if (dateFrom) return dateFrom;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    return sevenDaysAgo.toISOString().split('T')[0];
-  }, [dateFrom]);
-
-  const { data, isLoading, error } = useActivitiesPaginated({
-    page: currentPage,
-    pageSize: 15,
-    dateFrom: defaultDateFrom,
-    dateTo: dateTo || undefined,
-    projectId: debouncedProjectId || undefined,
-    searchTerm: debouncedSearchTerm || undefined,
-  });
-
-  const activities = data?.activities || [];
-  const totalCount = data?.totalCount || 0;
-  const totalPages = data?.totalPages || 1;
-
+  const { data: activities = [], isLoading } = useActivities();
   const deleteMutation = useDeleteActivity();
 
-  // Calcular horas do dia atual (otimizado com memoização)
   const totalHoursToday = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
     return activities
-      .filter(activity => activity.data_registro === today)
-      .reduce((sum, activity) => sum + Number(activity.horas_gastas || 0), 0);
-  }, [activities]);
-
-  // Memoizar estatísticas das atividades
-  const activityStats = useMemo(() => {
-    const totalHours = activities.reduce((sum, activity) => sum + Number(activity.horas_gastas || 0), 0);
-    const averageHours = activities.length > 0 ? totalHours / activities.length : 0;
-    
-    return {
-      totalHours: totalHours.toFixed(1),
-      averageHours: averageHours.toFixed(1),
-      totalActivities: activities.length
-    };
+      .filter(activity => {
+        const activityDate = new Date(activity.data_registro);
+        return activityDate.toDateString() === today.toDateString();
+      })
+      .reduce((sum, activity) => sum + Number(activity.horas_gastas), 0);
   }, [activities]);
 
   const handleNewActivity = useCallback(() => {
@@ -93,18 +49,6 @@ const Activities = () => {
     setIsModalOpen(false);
   }, []);
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
-
-  const handleClearFilters = useCallback(() => {
-    setSearchTerm("");
-    setDateFrom("");
-    setDateTo("");
-    setProjectId("");
-    setCurrentPage(1);
-  }, []);
-
   if (isLoading) {
     return (
       <div className="flex-1 space-y-6 p-6">
@@ -121,7 +65,6 @@ const Activities = () => {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-        <Skeleton className="h-32 w-full" />
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />
@@ -138,28 +81,6 @@ const Activities = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex-1 space-y-6 p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-red-500 mb-2">Erro ao carregar atividades</p>
-            <p className="text-sm text-muted-foreground">
-              {error instanceof Error ? error.message : "Erro desconhecido"}
-            </p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="mt-4"
-              variant="outline"
-            >
-              Tentar Novamente
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -167,18 +88,13 @@ const Activities = () => {
           <SidebarTrigger />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Registro de Atividades</h1>
-            <p className="text-muted-foreground">
-              Registre as horas trabalhadas em projetos • {totalCount} atividades
-            </p>
+            <p className="text-muted-foreground">Registre as horas trabalhadas em projetos</p>
           </div>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-chart-primary/10 text-chart-primary border-chart-primary">
             <Clock className="w-3 h-3 mr-1" />
-            Hoje: {totalHoursToday.toFixed(1)}h
-          </Badge>
-          <Badge variant="outline" className="bg-chart-secondary/10 text-chart-secondary border-chart-secondary">
-            Total: {activityStats.totalHours}h
+            Hoje: {totalHoursToday.toFixed(1)}h registradas
           </Badge>
           <Button onClick={handleNewActivity} className="bg-chart-primary hover:bg-chart-primary/90">
             <Plus className="w-4 h-4 mr-2" />
@@ -187,66 +103,30 @@ const Activities = () => {
         </div>
       </div>
 
-      <ActivitiesFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        dateFrom={dateFrom}
-        onDateFromChange={setDateFrom}
-        dateTo={dateTo}
-        onDateToChange={setDateTo}
-        projectId={projectId}
-        onProjectChange={setProjectId}
-        onClearFilters={handleClearFilters}
-      />
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-chart-secondary" />
             <span>Atividades Registradas</span>
-            {!dateFrom && (
-              <Badge variant="outline" className="text-xs">
-                Últimos 7 dias
-              </Badge>
-            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {activities.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                {searchTerm || projectId || dateFrom || dateTo 
-                  ? "Nenhuma atividade encontrada" 
-                  : "Nenhuma atividade registrada"
-                }
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm || projectId || dateFrom || dateTo
-                  ? "Tente ajustar os filtros ou limpar a busca."
-                  : "Comece registrando sua primeira atividade."
-                }
-              </p>
+              <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma atividade registrada</h3>
+              <p className="text-muted-foreground mb-4">Comece registrando sua primeira atividade.</p>
               <Button onClick={handleNewActivity} className="bg-chart-primary hover:bg-chart-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
-                Registrar Atividade
+                Registrar Primeira Atividade
               </Button>
             </div>
           ) : (
-            <>
-              <OptimizedActivitiesTable
-                activities={activities}
-                onEditActivity={handleEditActivity}
-                onDeleteActivity={handleDeleteActivity}
-              />
-              <ActivitiesPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={15}
-                onPageChange={handlePageChange}
-              />
-            </>
+            <OptimizedActivitiesTable
+              activities={activities}
+              onEditActivity={handleEditActivity}
+              onDeleteActivity={handleDeleteActivity}
+            />
           )}
         </CardContent>
       </Card>

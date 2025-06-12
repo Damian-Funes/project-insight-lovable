@@ -27,7 +27,7 @@ export const useCreateProject = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects-paginated"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast({
         title: "Sucesso!",
         description: "Projeto criado com sucesso.",
@@ -67,7 +67,7 @@ export const useUpdateProject = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects-paginated"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast({
         title: "Sucesso!",
         description: "Projeto atualizado com sucesso.",
@@ -100,7 +100,7 @@ export const useDeleteProject = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects-paginated"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast({
         title: "Sucesso!",
         description: "Projeto excluído com sucesso.",
@@ -114,17 +114,4 @@ export const useDeleteProject = () => {
       });
     },
   });
-};
-
-// Hook combinado que agrupa todas as mutações
-export const useProjectMutations = () => {
-  const createProject = useCreateProject();
-  const updateProject = useUpdateProject();
-  const deleteProject = useDeleteProject();
-
-  return {
-    createProject,
-    updateProject,
-    deleteProject,
-  };
 };

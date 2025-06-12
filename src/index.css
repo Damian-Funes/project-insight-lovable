@@ -1,10 +1,10 @@
 
-/* Importa o CSS de proteção da identidade visual */
-@import './styles/sidebar-lock.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Importa o CSS de proteção da identidade visual */
+@import './styles/sidebar-lock.css';
 
 /* Financial Dashboard Design System - IDENTIDADE VISUAL FIXA */
 

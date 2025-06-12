@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings, Tv, Cog } from "lucide-react";
+import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -34,11 +34,6 @@ const items = [
     title: "Projetos",
     url: "/projects",
     icon: Building2,
-  },
-  {
-    title: "Gestão de OPs (PCP)",
-    url: "/ordem-producao",
-    icon: Cog,
   },
   {
     title: "Áreas Produtivas",
