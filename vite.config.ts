@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -43,9 +42,9 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Configurações de otimização
+    // Configurações básicas de otimização
     target: 'es2020',
-    minify: 'terser',
+    minify: mode === 'production' ? 'terser' : false,
     cssCodeSplit: true,
     sourcemap: false,
     terserOptions: {
@@ -60,74 +59,31 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        // Estratégia de chunking otimizada e simplificada
-        manualChunks: {
-          // Vendor principal - React e dependências core
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          
-          // UI Library - Componentes Radix que realmente existem
-          'ui-vendor': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-label',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-tooltip',
-          ],
-          
-          // Charts Library - Recharts
-          'charts-vendor': ['recharts'],
-          
-          // Data Management - TanStack Query e date-fns
-          'data-vendor': ['@tanstack/react-query', 'date-fns'],
-          
-          // Supabase
-          'supabase-vendor': ['@supabase/supabase-js'],
-          
-          // Icons
-          'icons-vendor': ['lucide-react'],
-          
-          // Form handling
-          'forms-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          
-          // Utils
-          'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        // Chunking automático simples
+        manualChunks: (id) => {
+          // Vendor chunk para node_modules
+          if (id.includes('node_modules')) {
+            // React ecosystem
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            // UI components
+            if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+              return 'vendor-ui';
+            }
+            // Charts
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            // Other vendor packages
+            return 'vendor';
+          }
         },
         
         // Naming strategy para chunks
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.') || [];
-          const ext = info[info.length - 1];
-          
-          if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name || '')) {
-            return `assets/images/[name]-[hash][extname]`;
-          }
-          
-          if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name || '')) {
-            return `assets/fonts/[name]-[hash][extname]`;
-          }
-          
-          if (ext === 'css') {
-            return `assets/css/[name]-[hash][extname]`;
-          }
-          
-          return `assets/[name]-[hash][extname]`;
-        },
-      },
-      
-      // Tree shaking agressivo
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-        unknownGlobalSideEffects: false,
+        assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
     
