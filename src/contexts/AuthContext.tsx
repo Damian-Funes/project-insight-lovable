@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -28,13 +28,13 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = React.memo(({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Função não-bloqueante para verificar alertas pendentes
-  const checkPendingAlertsAsync = async (userId: string) => {
+  // Função não-bloqueante para verificar alertas pendentes (memoizada)
+  const checkPendingAlertsAsync = useCallback(async (userId: string) => {
     try {
       console.log('Verificando alertas pendentes em background para:', userId);
       const { error } = await supabase.rpc('check_pending_alerts_on_login', {
@@ -49,7 +49,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Erro ao executar verificação de alertas:', error);
     }
-  };
+  }, []);
+
+  // Memoizar funções de autenticação
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, nomeCompleto: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          nome_completo: nomeCompleto,
+        },
+      },
+    });
+    return { error };
+  }, []);
+
+  const signOut = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer logout.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     let isMounted = true;
@@ -115,59 +156,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkPendingAlertsAsync, loading]);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
-  };
-
-  const signUp = async (email: string, password: string, nomeCompleto: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          nome_completo: nomeCompleto,
-        },
-      },
-    });
-    return { error };
-  };
-
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao fazer logout.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const value = {
+  // Memoizar o valor do contexto para evitar re-renders desnecessários
+  const value = useMemo(() => ({
     user,
     loading,
     signIn,
     signUp,
     signOut,
-  };
+  }), [user, loading, signIn, signUp, signOut]);
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
+});
+
+AuthProvider.displayName = 'AuthProvider';
