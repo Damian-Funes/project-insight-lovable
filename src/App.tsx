@@ -1,63 +1,93 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+} from "react-router-dom";
+import { Auth } from "@/pages/Auth";
+import { Index } from "@/pages";
+import { Projects } from "@/pages/Projects";
+import { Areas } from "@/pages/Areas";
+import { Activities } from "@/pages/Activities";
+import { Reports } from "@/pages/Reports";
+import { CostDashboard } from "@/pages/CostDashboard";
+import { AreaManagement } from "@/pages/AreaManagement";
+import { NotFound } from "@/pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import Dashboard from "./pages/Dashboard";
-import Activities from "./pages/Activities";
-import Projects from "./pages/Projects";
-import Areas from "./pages/Areas";
-import AreaManagement from "./pages/AreaManagement";
-import Reports from "./pages/Reports";
-import CostDashboard from "./pages/CostDashboard";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
+import { Toaster } from "@/components/ui/toaster";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import Revenues from "@/pages/Revenues";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <SidebarProvider>
-                    <div className="min-h-screen flex w-full bg-background">
-                      <AppSidebar />
-                      <main className="flex-1 overflow-auto">
-                        <Routes>
-                          <Route path="/" element={<Dashboard />} />
-                          <Route path="/activities" element={<Activities />} />
-                          <Route path="/projects" element={<Projects />} />
-                          <Route path="/areas" element={<Areas />} />
-                          <Route path="/area-management" element={<AreaManagement />} />
-                          <Route path="/reports" element={<Reports />} />
-                          <Route path="/cost-dashboard" element={<CostDashboard />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </main>
-                    </div>
-                  </SidebarProvider>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <div className="p-6">
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Index />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/projects" element={
+                      <ProtectedRoute>
+                        <Projects />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/areas" element={
+                      <ProtectedRoute>
+                        <Areas />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/activities" element={
+                      <ProtectedRoute>
+                        <Activities />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/revenues" element={
+                      <ProtectedRoute>
+                        <Revenues />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/reports" element={
+                      <ProtectedRoute>
+                        <Reports />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/cost-dashboard" element={
+                      <ProtectedRoute>
+                        <CostDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/area-management" element={
+                      <ProtectedRoute>
+                        <AreaManagement />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
+          </div>
+          <Toaster />
+        </Router>
       </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;

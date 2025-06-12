@@ -1,32 +1,37 @@
-
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { 
+  Home, 
+  FolderOpen, 
+  Building2, 
+  Clock, 
+  BarChart3, 
+  TrendingUp, 
+  Settings,
+  DollarSign,
+  LogOut
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
-const menuItems = [
+export function AppSidebar() {
+  const { logout } = useAuth();
+
+  const items = [
   {
     title: "Dashboard",
     url: "/",
-    icon: BarChart3,
-  },
-  {
-    title: "Registro de Atividades",
-    url: "/activities",
-    icon: Clock,
+    icon: Home,
   },
   {
     title: "Projetos",
@@ -36,96 +41,59 @@ const menuItems = [
   {
     title: "Áreas Produtivas",
     url: "/areas",
-    icon: Users,
+    icon: Building2,
   },
   {
-    title: "Gestão de Áreas",
-    url: "/area-management",
-    icon: Settings,
+    title: "Atividades",
+    url: "/activities",
+    icon: Clock,
   },
   {
-    title: "Dashboards de Custos",
-    url: "/cost-dashboard",
+    title: "Receitas",
+    url: "/revenues",
     icon: DollarSign,
   },
   {
     title: "Relatórios",
     url: "/reports",
-    icon: FileText,
+    icon: BarChart3,
+  },
+  {
+    title: "Dashboards de Custos",
+    url: "/cost-dashboard",
+    icon: TrendingUp,
+  },
+  {
+    title: "Gerenciar Áreas",
+    url: "/area-management",
+    icon: Settings,
   },
 ];
 
-export function AppSidebar() {
-  const location = useLocation();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   return (
-    <Sidebar className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-chart-primary to-chart-secondary rounded-lg flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-sidebar-foreground">FinPlan</h1>
-            <p className="text-xs text-sidebar-foreground/60">Planejamento Estratégico</p>
-          </div>
-        </div>
-      </SidebarHeader>
-      
-      <SidebarContent className="p-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs font-medium mb-2">
-            NAVEGAÇÃO
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
+    <Sidebar>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarGroup>
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarGroupContent>
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <Link to={item.url} className="nav-link">
-                      <item.icon className="w-5 h-5" />
-                      <span className="font-medium">{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                  <Link to={item.url} className="flex items-center gap-2">
+                    <item.icon className="w-4 h-4" />
+                    {item.title}
+                  </Link>
                 </SidebarMenuItem>
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarMenu>
       </SidebarContent>
-      
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        {user && (
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3 px-4 py-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-chart-secondary to-chart-tertiary rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  {user.email}
-                </p>
-                <p className="text-xs text-sidebar-foreground/60">Líder de Área</p>
-              </div>
-            </div>
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              size="sm"
-              className="w-full"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        )}
+      <SidebarFooter>
+        <Button variant="ghost" className="w-full justify-start" onClick={logout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Sair
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
