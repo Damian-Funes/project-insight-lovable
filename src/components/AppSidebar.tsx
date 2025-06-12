@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings } from "lucide-react";
+import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -44,6 +44,11 @@ const items = [
     title: "Gestão de Áreas",
     url: "/area-management",
     icon: Settings,
+  },
+  {
+    title: "TV Corporativa",
+    url: "/tv-corporativa",
+    icon: Tv,
   },
   {
     title: "Relatórios",

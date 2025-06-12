@@ -1,4 +1,3 @@
-
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -24,6 +23,7 @@ const AlertsConfiguration = React.lazy(() => import("@/pages/AlertsConfiguration
 const Reports = React.lazy(() => import("@/pages/Reports"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const PredictiveModels = React.lazy(() => import("@/pages/PredictiveModels"));
+const TvCorporativa = React.lazy(() => import("@/pages/TvCorporativa"));
 
 // Componente de loading personalizado
 const PageLoader = () => (
@@ -133,6 +133,14 @@ function App() {
                     element={
                       <Suspense fallback={<PageLoader />}>
                         <PredictiveModels />
+                      </Suspense>
+                    } 
+                  />
+                  <Route 
+                    path="tv-corporativa" 
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <TvCorporativa />
                       </Suspense>
                     } 
                   />
