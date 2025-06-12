@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 
 interface UseActivitiesOptions {
   page?: number;
@@ -14,15 +15,29 @@ interface UseActivitiesOptions {
 export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
   const {
     page = 1,
-    pageSize = 15, // Reduzido para melhor performance
+    pageSize = 15,
     dateFrom,
     dateTo,
     projectId,
     searchTerm
   } = options;
 
+  // Memoizar queryKey para evitar re-renders desnecessários
+  const queryKey = useMemo(
+    () => ["activities-paginated", page, pageSize, dateFrom, dateTo, projectId, searchTerm],
+    [page, pageSize, dateFrom, dateTo, projectId, searchTerm]
+  );
+
+  // Memoizar data padrão para melhor performance
+  const defaultDateFrom = useMemo(() => {
+    if (dateFrom) return dateFrom;
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return sevenDaysAgo.toISOString().split('T')[0];
+  }, [dateFrom]);
+
   return useQuery({
-    queryKey: ["activities-paginated", page, pageSize, dateFrom, dateTo, projectId, searchTerm],
+    queryKey,
     queryFn: async () => {
       console.log("Buscando atividades paginadas...", options);
       
@@ -43,14 +58,7 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
         `, { count: 'exact' });
 
       // Aplicar filtros com defaults otimizados
-      if (dateFrom) {
-        query = query.gte("data_registro", dateFrom);
-      } else {
-        // Por padrão, buscar apenas os últimos 7 dias para melhor performance
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        query = query.gte("data_registro", sevenDaysAgo.toISOString().split('T')[0]);
-      }
+      query = query.gte("data_registro", defaultDateFrom);
       
       if (dateTo) {
         query = query.lte("data_registro", dateTo);
@@ -85,9 +93,11 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
         currentPage: page
       };
     },
-    staleTime: 1 * 60 * 1000, // 1 minuto para dados mais frescos
-    gcTime: 3 * 60 * 1000, // 3 minutos
+    staleTime: 2 * 60 * 1000, // 2 minutos para atividades (dados mais dinâmicos)
+    gcTime: 5 * 60 * 1000, // 5 minutos no cache
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Não refetch automático no mount
+    refetchOnMount: false,
+    // Usar cache anterior enquanto busca novos dados
+    placeholderData: (previousData) => previousData,
   });
 };

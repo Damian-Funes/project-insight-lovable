@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 
 interface UseProjectsOptions {
   page?: number;
@@ -17,8 +18,14 @@ export const useProjectsPaginated = (options: UseProjectsOptions = {}) => {
     searchTerm
   } = options;
 
+  // Memoizar queryKey para evitar re-renders desnecessários
+  const queryKey = useMemo(
+    () => ["projects-paginated", page, pageSize, status, searchTerm],
+    [page, pageSize, status, searchTerm]
+  );
+
   return useQuery({
-    queryKey: ["projects-paginated", page, pageSize, status, searchTerm],
+    queryKey,
     queryFn: async () => {
       console.log("Buscando projetos paginados...", options);
       
@@ -65,8 +72,11 @@ export const useProjectsPaginated = (options: UseProjectsOptions = {}) => {
         currentPage: page
       };
     },
-    staleTime: 2 * 60 * 1000, // 2 minutos
-    gcTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutos para projetos (dados menos dinâmicos)
+    gcTime: 10 * 60 * 1000, // 10 minutos no cache
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Evitar refetch automático
+    // Usar cache anterior enquanto busca novos dados
+    placeholderData: (previousData) => previousData,
   });
 };

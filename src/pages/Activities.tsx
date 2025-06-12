@@ -61,6 +61,18 @@ const Activities = () => {
       .reduce((sum, activity) => sum + Number(activity.horas_gastas || 0), 0);
   }, [activities]);
 
+  // Memoizar estatísticas das atividades
+  const activityStats = useMemo(() => {
+    const totalHours = activities.reduce((sum, activity) => sum + Number(activity.horas_gastas || 0), 0);
+    const averageHours = activities.length > 0 ? totalHours / activities.length : 0;
+    
+    return {
+      totalHours: totalHours.toFixed(1),
+      averageHours: averageHours.toFixed(1),
+      totalActivities: activities.length
+    };
+  }, [activities]);
+
   const handleNewActivity = useCallback(() => {
     setSelectedActivity(null);
     setModalMode("create");
@@ -163,7 +175,10 @@ const Activities = () => {
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-chart-primary/10 text-chart-primary border-chart-primary">
             <Clock className="w-3 h-3 mr-1" />
-            Hoje: {totalHoursToday.toFixed(1)}h registradas
+            Hoje: {totalHoursToday.toFixed(1)}h
+          </Badge>
+          <Badge variant="outline" className="bg-chart-secondary/10 text-chart-secondary border-chart-secondary">
+            Total: {activityStats.totalHours}h
           </Badge>
           <Button onClick={handleNewActivity} className="bg-chart-primary hover:bg-chart-primary/90">
             <Plus className="w-4 h-4 mr-2" />
