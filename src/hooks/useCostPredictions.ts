@@ -42,9 +42,13 @@ export const useCostPredictions = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["cost-predictions"] });
       queryClient.invalidateQueries({ queryKey: ["predictive-models"] });
+      
+      // Tratar o retorno da função RPC com type assertion segura
+      const resultado = data as { mensagem?: string; sucesso?: boolean } | null;
+      
       toast({
         title: "Sucesso",
-        description: data?.mensagem || "Previsões de custo atualizadas com sucesso!",
+        description: resultado?.mensagem || "Previsões de custo atualizadas com sucesso!",
       });
     },
     onError: (error) => {
