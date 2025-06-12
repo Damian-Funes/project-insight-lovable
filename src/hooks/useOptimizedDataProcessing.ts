@@ -1,5 +1,5 @@
 
-import { useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useCallback, useRef, useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { MemoizedCalculator, processInChunks, runHeavyCalculation } from "@/utils/asyncProcessing";
 
@@ -47,15 +47,15 @@ export const useOptimizedDataProcessing = <T, R>(
     try {
       const cacheKey = JSON.stringify(debouncedData);
       
-      const processedResults = await calculatorRef.current.calculate(
+      const processedResults = calculatorRef.current.calculate(
         cacheKey,
         debouncedData,
-        async (data) => {
-          return await processInChunks(
+        (data) => {
+          return processInChunks(
             data,
             processor,
             chunkSize,
-            0 // sem delay adicional pois já temos debounce
+            0
           );
         }
       );

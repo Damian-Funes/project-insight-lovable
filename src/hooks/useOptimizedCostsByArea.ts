@@ -71,8 +71,8 @@ export const useOptimizedCostsByArea = (filters?: OptimizedCostsByAreaFilters) =
     return {
       totalCost: Math.round(totalCost * 100) / 100,
       averageCostPerArea: Math.round(averageCostPerArea * 100) / 100,
-      mostExpensiveArea: sortedByost[0]?.nome_area || '',
-      leastExpensiveArea: sortedByost[sortedByost.length - 1]?.nome_area || '',
+      mostExpensiveArea: sortedByCost[0]?.nome_area || '',
+      leastExpensiveArea: sortedByCost[sortedByCost.length - 1]?.nome_area || '',
       areasWithActivity: data.length
     };
   }, [query.data]);

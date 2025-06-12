@@ -4,9 +4,29 @@
  */
 
 /**
- * Processa uma array em chunks assíncronos para evitar bloqueio da UI
+ * Processa uma array em chunks para evitar bloqueio da UI
  */
-export const processInChunks = async <T, R>(
+export const processInChunks = <T, R>(
+  array: T[],
+  processor: (chunk: T[]) => R,
+  chunkSize: number = 100,
+  delay: number = 0
+): R[] => {
+  const results: R[] = [];
+  
+  for (let i = 0; i < array.length; i += chunkSize) {
+    const chunk = array.slice(i, i + chunkSize);
+    const result = processor(chunk);
+    results.push(result);
+  }
+  
+  return results;
+};
+
+/**
+ * Versão assíncrona do processamento em chunks
+ */
+export const processInChunksAsync = async <T, R>(
   array: T[],
   processor: (chunk: T[]) => R,
   chunkSize: number = 100,
