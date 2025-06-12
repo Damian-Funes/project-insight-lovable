@@ -1,16 +1,19 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Monitor, Tv } from "lucide-react";
+import { Monitor, Tv, FolderOpen } from "lucide-react";
 import { AreaFilter } from "@/components/AreaFilter";
 import { useAreas } from "@/hooks/useAreas";
 import { useReworkMetrics } from "@/hooks/useReworkMetrics";
+import { useAreaProjects } from "@/hooks/useAreaProjects";
 import { ReworkChart } from "@/components/ReworkChart";
+import { ProjectProgressCard } from "@/components/ProjectProgressCard";
 
 const TvCorporativa = () => {
   const [selectedArea, setSelectedArea] = useState<string>("all");
   const { data: areas } = useAreas();
   const { data: reworkMetrics, isLoading: isLoadingRework } = useReworkMetrics(selectedArea);
+  const { data: areaProjects, isLoading: isLoadingProjects } = useAreaProjects(selectedArea);
 
   const selectedAreaName = selectedArea === "all" 
     ? "Nenhuma Área Selecionada" 
@@ -67,7 +70,7 @@ const TvCorporativa = () => {
           </Card>
         ) : (
           <div className="space-y-8">
-            {/* Seção de Retrabalho */}
+            {/* Primeira linha - Retrabalho */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1">
                 <ReworkChart
@@ -106,6 +109,60 @@ const TvCorporativa = () => {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Segunda linha - Projetos Ativos */}
+            <div>
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-foreground flex items-center space-x-4">
+                  <FolderOpen className="w-10 h-10 text-chart-secondary" />
+                  <span>Projetos Ativos da Área</span>
+                </h2>
+                <p className="text-xl text-muted-foreground mt-2">
+                  Acompanhe o progresso dos principais projetos em andamento
+                </p>
+              </div>
+
+              {isLoadingProjects ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <ProjectProgressCard
+                      key={index}
+                      id=""
+                      nome_projeto=""
+                      progress={0}
+                      totalHours={0}
+                      orcamento_total={null}
+                      isLoading={true}
+                    />
+                  ))}
+                </div>
+              ) : areaProjects && areaProjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {areaProjects.map((project) => (
+                    <ProjectProgressCard
+                      key={project.id}
+                      id={project.id}
+                      nome_projeto={project.nome_projeto}
+                      progress={project.progress}
+                      totalHours={project.totalHours}
+                      orcamento_total={project.orcamento_total}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Card className="bg-card border border-dashed border-chart-secondary/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <FolderOpen className="w-16 h-16 text-chart-secondary mb-4" />
+                    <h3 className="text-2xl font-bold text-foreground mb-2">
+                      Nenhum Projeto Ativo
+                    </h3>
+                    <p className="text-lg text-muted-foreground text-center">
+                      Não há projetos ativos com atividades registradas para esta área.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         )}
