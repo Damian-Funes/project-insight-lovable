@@ -12,6 +12,7 @@ interface VirtualizedTableProps {
   }>;
   itemHeight?: number;
   height?: number;
+  width?: number;
 }
 
 const TableRowItem = memo(({ index, style, data }: any) => {
@@ -37,7 +38,8 @@ export const VirtualizedTable = memo(({
   data,
   columns,
   itemHeight = 60,
-  height = 400
+  height = 400,
+  width = "100%"
 }: VirtualizedTableProps) => {
   if (!data || data.length === 0) {
     return (
@@ -61,6 +63,7 @@ export const VirtualizedTable = memo(({
       <div className="overflow-hidden">
         <List
           height={Math.min(height, data.length * itemHeight)}
+          width={width}
           itemCount={data.length}
           itemSize={itemHeight}
           itemData={{ items: data, columns }}
