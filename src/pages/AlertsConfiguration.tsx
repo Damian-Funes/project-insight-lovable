@@ -6,15 +6,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, CheckCircle } from "lucide-react";
 import { AlertFormModal } from "@/components/AlertFormModal";
 import { useAlerts } from "@/hooks/useAlerts";
+import { usePendingAlerts } from "@/hooks/usePendingAlerts";
 import { Database } from "@/integrations/supabase/types";
+import { useToast } from "@/hooks/use-toast";
 
 type AlertasConfig = Database["public"]["Tables"]["alertas_config"]["Row"];
 
 const AlertsConfiguration = () => {
   const { alerts, isLoading, deleteAlert, toggleAlert } = useAlerts();
+  const { checkAllPendingActivities } = usePendingAlerts();
+  const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alertToEdit, setAlertToEdit] = useState<AlertasConfig | null>(null);
 
@@ -39,6 +43,22 @@ const AlertsConfiguration = () => {
     });
   };
 
+  const handleCheckPendingActivities = async () => {
+    try {
+      await checkAllPendingActivities.mutateAsync();
+      toast({
+        title: "Verificação Executada",
+        description: "Verificação de registros pendentes executada com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao executar verificação de registros pendentes.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getBadgeVariant = (tipo: string) => {
     switch (tipo) {
       case "Orçamento Excedido":
@@ -61,10 +81,21 @@ const AlertsConfiguration = () => {
             Configure alertas personalizados para monitorar projetos e atividades
           </p>
         </div>
-        <Button onClick={handleCreate} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Alerta
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleCheckPendingActivities}
+            disabled={checkAllPendingActivities.isPending}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <CheckCircle className="h-4 w-4" />
+            {checkAllPendingActivities.isPending ? "Verificando..." : "Verificar Registros Pendentes"}
+          </Button>
+          <Button onClick={handleCreate} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Alerta
+          </Button>
+        </div>
       </div>
 
       <Card>

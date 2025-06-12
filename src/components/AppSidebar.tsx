@@ -1,4 +1,6 @@
 
+import React from "react";
+import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,29 +12,27 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt, Activity, Bell } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { NotificationBell } from "./NotificationBell";
+import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/NotificationBell";
 
-const menuItems = [
+// Menu items.
+const items = [
   {
     title: "Dashboard",
     url: "/",
-    icon: BarChart3,
+    icon: Home,
   },
   {
     title: "Atividades",
     url: "/activities",
-    icon: Activity,
+    icon: FileText,
   },
   {
     title: "Projetos",
     url: "/projects",
-    icon: FolderOpen,
+    icon: Building2,
   },
   {
     title: "Áreas Produtivas",
@@ -47,7 +47,7 @@ const menuItems = [
   {
     title: "Relatórios",
     url: "/reports",
-    icon: FileText,
+    icon: BarChart3,
   },
   {
     title: "Dashboard de Custos",
@@ -60,7 +60,7 @@ const menuItems = [
     icon: TrendingUp,
   },
   {
-    title: "Previsão Financeira",
+    title: "Projeção Financeira",
     url: "/financial-projection",
     icon: TrendingUp,
   },
@@ -71,45 +71,31 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const location = useLocation();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
+export function AppSidebar() {
+  const { signOut } = useAuth();
 
   return (
-    <Sidebar className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border p-6">
+    <Sidebar>
+      <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-chart-primary to-chart-secondary rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-sidebar-foreground">FinPlan</h1>
-              <p className="text-xs text-sidebar-foreground/60">Planejamento Estratégico</p>
-            </div>
-          </div>
+          <h2 className="text-lg font-semibold text-sidebar-foreground">
+            Gestão de Projetos
+          </h2>
           <NotificationBell />
         </div>
       </SidebarHeader>
-      
-      <SidebarContent className="p-4">
+      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs font-medium mb-2">
-            NAVEGAÇÃO
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <Link to={item.url} className="nav-link">
-                      <item.icon className="w-5 h-5" />
-                      <span className="font-medium">{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -117,34 +103,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {user && (
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3 px-4 py-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-chart-secondary to-chart-tertiary rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  {user.email}
-                </p>
-                <p className="text-xs text-sidebar-foreground/60">Líder de Área</p>
-              </div>
-            </div>
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              size="sm"
-              className="w-full"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        )}
+        <Button 
+          variant="outline" 
+          onClick={signOut}
+          className="w-full"
+        >
+          Sair
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );

@@ -336,7 +336,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_pending_activity_alerts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      check_pending_alerts_on_login: {
+        Args: { user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       tipo_alerta:
