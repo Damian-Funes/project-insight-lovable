@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Monitor, Tv } from "lucide-react";
 import { AreaFilter } from "@/components/AreaFilter";
 import { useAreas } from "@/hooks/useAreas";
+import { useReworkMetrics } from "@/hooks/useReworkMetrics";
+import { ReworkChart } from "@/components/ReworkChart";
 
 const TvCorporativa = () => {
   const [selectedArea, setSelectedArea] = useState<string>("all");
   const { data: areas } = useAreas();
+  const { data: reworkMetrics, isLoading: isLoadingRework } = useReworkMetrics(selectedArea);
 
   const selectedAreaName = selectedArea === "all" 
     ? "Nenhuma Área Selecionada" 
@@ -64,22 +67,18 @@ const TvCorporativa = () => {
           </Card>
         ) : (
           <div className="space-y-8">
-            {/* Placeholder para futuras métricas da área selecionada */}
+            {/* Seção de Retrabalho */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="bg-card border border-border">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-chart-primary flex items-center space-x-3">
-                    <Monitor className="w-8 h-8" />
-                    <span>Métricas em Tempo Real</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg text-muted-foreground">
-                    Painel será implementado com métricas específicas da área selecionada.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="lg:col-span-1">
+                <ReworkChart
+                  reworkPercentage={reworkMetrics?.reworkPercentage || 0}
+                  reworkHours={reworkMetrics?.reworkHours || 0}
+                  standardHours={reworkMetrics?.standardHours || 0}
+                  isLoading={isLoadingRework}
+                />
+              </div>
 
+              {/* Placeholder para futuras métricas */}
               <Card className="bg-card border border-border">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold text-chart-secondary flex items-center space-x-3">
