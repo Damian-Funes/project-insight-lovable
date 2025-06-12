@@ -1,15 +1,13 @@
-import React, { useMemo, useCallback, useState } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import React, { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, FolderOpen } from "lucide-react";
 import { ProjectFormModal } from "@/components/ProjectFormModal";
 import { useProjectsPaginated } from "@/hooks/useProjectsPaginated";
 import { useProjectMutations } from "@/hooks/useProjectMutations";
+import { useProjectStats } from "@/hooks/useProjectStats";
 import { ProjectsFilters } from "@/components/ProjectsFilters";
-import { ProjectsPagination } from "@/components/ProjectsPagination";
-import { OptimizedProjectsTable } from "@/components/OptimizedProjectsTable";
+import { ProjectsHeader } from "@/components/ProjectsHeader";
+import { ProjectsContent } from "@/components/ProjectsContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { ProjectFormData } from "@/components/ProjectFormModal";
@@ -40,20 +38,8 @@ const Projects = () => {
 
   const { createProject, updateProject, deleteProject } = useProjectMutations();
 
-  // Memoizar estatísticas dos projetos
-  const projectStats = useMemo(() => {
-    const stats = projects.reduce((acc, project) => {
-      acc[project.status_projeto] = (acc[project.status_projeto] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    return {
-      total: projects.length,
-      ativo: stats['Ativo'] || 0,
-      concluido: stats['Concluído'] || 0,
-      cancelado: stats['Cancelado'] || 0,
-    };
-  }, [projects]);
+  // Usar hook customizado para estatísticas
+  const projectStats = useProjectStats(projects);
 
   const handleNewProject = useCallback(() => {
     setSelectedProject(null);
@@ -101,7 +87,7 @@ const Projects = () => {
   }, []);
 
   // Preparar dados iniciais do form
-  const formInitialData = useMemo(() => {
+  const formInitialData = React.useMemo(() => {
     if (modalMode === "edit" && selectedProject) {
       return {
         nome_projeto: selectedProject.nome_projeto,
@@ -120,7 +106,7 @@ const Projects = () => {
       <div className="flex-1 space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <SidebarTrigger />
+            <Skeleton className="h-6 w-6" />
             <div>
               <Skeleton className="h-8 w-64 mb-2" />
               <Skeleton className="h-4 w-48" />
@@ -134,18 +120,18 @@ const Projects = () => {
           </div>
         </div>
         <Skeleton className="h-32 w-full" />
-        <Card>
-          <CardHeader>
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
             <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -174,32 +160,11 @@ const Projects = () => {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Gestão de Projetos</h1>
-            <p className="text-muted-foreground">
-              Gerencie seus projetos e acompanhe o progresso • {totalCount} projetos
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Badge variant="outline" className="bg-chart-primary/10 text-chart-primary border-chart-primary">
-            Ativos: {projectStats.ativo}
-          </Badge>
-          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-            Concluídos: {projectStats.concluido}
-          </Badge>
-          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-            Cancelados: {projectStats.cancelado}
-          </Badge>
-          <Button onClick={handleNewProject} className="bg-chart-primary hover:bg-chart-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Projeto
-          </Button>
-        </div>
-      </div>
+      <ProjectsHeader
+        totalCount={totalCount}
+        projectStats={projectStats}
+        onNewProject={handleNewProject}
+      />
 
       <ProjectsFilters
         searchTerm={searchTerm}
@@ -209,52 +174,19 @@ const Projects = () => {
         onClearFilters={handleClearFilters}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FolderOpen className="w-5 h-5 text-chart-secondary" />
-            <span>Projetos Cadastrados</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {projects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              <FolderOpen className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                {searchTerm || status 
-                  ? "Nenhum projeto encontrado" 
-                  : "Nenhum projeto cadastrado"
-                }
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm || status
-                  ? "Tente ajustar os filtros ou limpar a busca."
-                  : "Comece criando seu primeiro projeto."
-                }
-              </p>
-              <Button onClick={handleNewProject} className="bg-chart-primary hover:bg-chart-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Projeto
-              </Button>
-            </div>
-          ) : (
-            <>
-              <OptimizedProjectsTable
-                projects={projects}
-                onEditProject={handleEditProject}
-                onDeleteProject={handleDeleteProject}
-              />
-              <ProjectsPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={10}
-                onPageChange={handlePageChange}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <ProjectsContent
+        projects={projects}
+        searchTerm={searchTerm}
+        status={status}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={10}
+        onEditProject={handleEditProject}
+        onDeleteProject={handleDeleteProject}
+        onNewProject={handleNewProject}
+        onPageChange={handlePageChange}
+      />
 
       <ProjectFormModal
         open={isModalOpen}
