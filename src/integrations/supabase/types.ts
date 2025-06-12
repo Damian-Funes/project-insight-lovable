@@ -107,6 +107,39 @@ export type Database = {
           },
         ]
       }
+      modelos_preditivos: {
+        Row: {
+          created_at: string
+          data_treinamento: string | null
+          descricao_modelo: string | null
+          id: string
+          nome_modelo: string
+          parametros_modelo: Json | null
+          status_modelo: string
+          tipo_modelo: string
+        }
+        Insert: {
+          created_at?: string
+          data_treinamento?: string | null
+          descricao_modelo?: string | null
+          id?: string
+          nome_modelo: string
+          parametros_modelo?: Json | null
+          status_modelo?: string
+          tipo_modelo: string
+        }
+        Update: {
+          created_at?: string
+          data_treinamento?: string | null
+          descricao_modelo?: string | null
+          id?: string
+          nome_modelo?: string
+          parametros_modelo?: Json | null
+          status_modelo?: string
+          tipo_modelo?: string
+        }
+        Relationships: []
+      }
       notificacoes: {
         Row: {
           alerta_id: string | null
@@ -368,6 +401,50 @@ export type Database = {
             columns: ["responsavel_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resultados_preditivos: {
+        Row: {
+          created_at: string
+          data_previsao: string
+          detalhes_anomalia: string | null
+          id: string
+          intervalo_confianca_max: number | null
+          intervalo_confianca_min: number | null
+          modelo_id: string
+          tipo_previsao: string
+          valor_previsto: number | null
+        }
+        Insert: {
+          created_at?: string
+          data_previsao: string
+          detalhes_anomalia?: string | null
+          id?: string
+          intervalo_confianca_max?: number | null
+          intervalo_confianca_min?: number | null
+          modelo_id: string
+          tipo_previsao: string
+          valor_previsto?: number | null
+        }
+        Update: {
+          created_at?: string
+          data_previsao?: string
+          detalhes_anomalia?: string | null
+          id?: string
+          intervalo_confianca_max?: number | null
+          intervalo_confianca_min?: number | null
+          modelo_id?: string
+          tipo_previsao?: string
+          valor_previsto?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resultados_preditivos_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "modelos_preditivos"
             referencedColumns: ["id"]
           },
         ]
