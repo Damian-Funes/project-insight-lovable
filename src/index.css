@@ -3,7 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Financial Dashboard Design System */
+/* Importa o CSS de proteção da identidade visual */
+@import './styles/sidebar-lock.css';
+
+/* Financial Dashboard Design System - IDENTIDADE VISUAL FIXA */
 
 @layer base {
   :root {
@@ -37,6 +40,7 @@
 
     --radius: 0.75rem;
 
+    /* SIDEBAR - IDENTIDADE VISUAL FIXA - NÃO ALTERAR! */
     --sidebar-background: 220 25% 5%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 221 83% 53%;

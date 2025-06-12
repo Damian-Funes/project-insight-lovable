@@ -1,0 +1,41 @@
+
+/* 
+ * IDENTIDADE VISUAL FIXA - NÃO ALTERAR!
+ * Este arquivo garante que a sidebar mantenha sempre a mesma aparência
+ */
+
+/* Força as variáveis CSS específicas da sidebar */
+:root {
+  /* Cores principais da sidebar - NUNCA ALTERAR */
+  --sidebar-background: 220 25% 5% !important;
+  --sidebar-foreground: 210 40% 98% !important;
+  --sidebar-primary: 221 83% 53% !important;
+  --sidebar-primary-foreground: 210 40% 98% !important;
+  --sidebar-accent: 220 20% 12% !important;
+  --sidebar-accent-foreground: 210 40% 98% !important;
+  --sidebar-border: 220 20% 15% !important;
+  --sidebar-ring: 221 83% 53% !important;
+}
+
+/* Garante que a sidebar sempre tenha o visual correto */
+[data-sidebar="sidebar"] {
+  background-color: hsl(var(--sidebar-background)) !important;
+  color: hsl(var(--sidebar-foreground)) !important;
+  border-right: 1px solid hsl(var(--sidebar-border)) !important;
+}
+
+/* Header da sidebar com gradiente fixo */
+[data-sidebar="header"] .bg-gradient-to-br {
+  background: linear-gradient(to bottom right, hsl(221, 83%, 53%), hsl(262, 83%, 58%)) !important;
+}
+
+/* Menu ativo sempre com a cor primary */
+[data-sidebar="menu-button"][data-active="true"] {
+  background-color: hsl(var(--sidebar-primary)) !important;
+  color: hsl(var(--sidebar-primary-foreground)) !important;
+}
+
+/* Avatar do usuário com gradiente fixo */
+.bg-gradient-to-br.from-chart-secondary.to-chart-tertiary {
+  background: linear-gradient(to bottom right, hsl(262, 83%, 58%), hsl(142, 76%, 36%)) !important;
+}

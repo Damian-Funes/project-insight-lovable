@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppSidebar } from "@/components/AppSidebar";
+import { VisualIdentityGuard } from "@/components/VisualIdentityGuard";
 import Dashboard from "./pages/Dashboard";
 import Activities from "./pages/Activities";
 import Projects from "./pages/Projects";
@@ -25,6 +26,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <VisualIdentityGuard />
       <AuthProvider>
         <BrowserRouter>
           <Routes>

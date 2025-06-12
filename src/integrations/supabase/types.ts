@@ -104,6 +104,47 @@ export type Database = {
         }
         Relationships: []
       }
+      receitas: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          data_receita: string
+          descricao_receita: string | null
+          id: string
+          projeto_id: string
+          tipo_receita: string | null
+          valor_receita: number
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          data_receita: string
+          descricao_receita?: string | null
+          id?: string
+          projeto_id: string
+          tipo_receita?: string | null
+          valor_receita: number
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          data_receita?: string
+          descricao_receita?: string | null
+          id?: string
+          projeto_id?: string
+          tipo_receita?: string | null
+          valor_receita?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_receitas_projeto"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registros_atividades: {
         Row: {
           area_id: string
