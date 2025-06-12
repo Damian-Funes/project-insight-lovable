@@ -52,6 +52,7 @@ function App() {
               {/* Todas as rotas protegidas usam o ProtectedLayout */}
               <Route path="/" element={<ProtectedLayout />}>
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="dashboard-ops" element={<DashboardOPs />} />
                 <Route path="activities" element={<Activities />} />
                 <Route path="projects" element={<Projects />} />
                 <Route path="areas" element={<Areas />} />
