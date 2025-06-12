@@ -1,9 +1,9 @@
 
 import React, { memo, forwardRef, useRef, useImperativeHandle } from "react";
-import { Input, type InputProps } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-interface OptimizedInputProps extends Omit<InputProps, 'onChange'> {
+interface OptimizedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onChange?: (value: string) => void;
   controlled?: boolean;
   debounceMs?: number;

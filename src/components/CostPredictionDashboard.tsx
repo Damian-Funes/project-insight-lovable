@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CostPredictionChart } from "./CostPredictionChart";
 import { useCostPredictions } from "@/hooks/useCostPredictions";
+import { DashboardChartsSkeleton } from "./OptimizedLoadingSpinner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -31,10 +32,7 @@ export const CostPredictionDashboard = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-foreground">Previsão de Custos</h2>
         </div>
-        <div className="text-center py-8">
-          <div className="w-8 h-8 border-2 border-chart-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground mt-2">Carregando previsões...</p>
-        </div>
+        <DashboardChartsSkeleton />
       </div>
     );
   }

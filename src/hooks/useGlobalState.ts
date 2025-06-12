@@ -1,135 +1,85 @@
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
-import { QUERY_KEYS, INVALIDATION_PATTERNS } from "@/config/queryClient";
+import { useCallback } from "react";
+
+export interface GlobalState {
+  selectedProjects: string[];
+  selectedAreas: string[];
+  dateRange: {
+    start: Date | null;
+    end: Date | null;
+  };
+  refreshTrigger: number;
+}
+
+const INITIAL_STATE: GlobalState = {
+  selectedProjects: [],
+  selectedAreas: [],
+  dateRange: {
+    start: null,
+    end: null,
+  },
+  refreshTrigger: 0,
+};
 
 export const useGlobalState = () => {
   const queryClient = useQueryClient();
 
-  // Função para prefetching de dados comuns
-  const prefetchCommonData = useCallback(async () => {
-    const prefetchPromises = [
-      // Prefetch dados estáticos mais usados
-      queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.OPTIMIZED_AREAS,
-        queryFn: async () => {
-          // Simular busca de áreas
-          return [];
-        },
-      }),
-      
-      queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.OPTIMIZED_PROJECTS,
-        queryFn: async () => {
-          // Simular busca de projetos
-          return [];
-        },
-      }),
-    ];
-
-    await Promise.allSettled(prefetchPromises);
-  }, [queryClient]);
-
-  // Função para atualizar dados sem refetching
-  const updateQueryData = useCallback(<T>(
-    queryKey: readonly unknown[],
-    updater: (oldData: T | undefined) => T
-  ) => {
-    queryClient.setQueryData(queryKey, updater);
-  }, [queryClient]);
-
-  // Função para invalidação seletiva com tipos simplificados
-  const invalidateQueries = useCallback((pattern: keyof typeof INVALIDATION_PATTERNS, ...args: unknown[]) => {
-    let queryKeys: unknown[][] = [];
-    
-    if (pattern === 'PROJECT_RELATED' && args.length > 0) {
-      const projectKeys = INVALIDATION_PATTERNS.PROJECT_RELATED(args[0] as string);
-      queryKeys = projectKeys.map(key => Array.from(key));
-    } else if (pattern === 'AREA_RELATED' && args.length > 0) {
-      const areaKeys = INVALIDATION_PATTERNS.AREA_RELATED(args[0] as string);
-      queryKeys = areaKeys.map(key => Array.from(key));
-    } else {
-      const patternFunction = INVALIDATION_PATTERNS[pattern];
-      if (typeof patternFunction === 'function') {
-        const keys = patternFunction();
-        queryKeys = keys.map(key => Array.from(key));
-      }
-    }
-    
+  const invalidateQueries = useCallback((queryKeys: string[][]) => {
     queryKeys.forEach(queryKey => {
       queryClient.invalidateQueries({ queryKey });
     });
   }, [queryClient]);
 
-  // Função para invalidar dados relacionados a uma atividade
-  const invalidateActivityRelated = useCallback((activityData: {
-    projeto_id?: string;
-    area_id?: string;
-  }) => {
-    // Invalidar atividades
-    invalidateQueries('ACTIVITIES_ALL');
-    
-    // Invalidar dashboards
-    invalidateQueries('DASHBOARDS_ALL');
-    
-    // Invalidar dados específicos do projeto
-    if (activityData.projeto_id) {
-      invalidateQueries('PROJECT_RELATED', activityData.projeto_id);
+  const invalidateProjectRelatedQueries = useCallback((projectId?: string) => {
+    const baseQueries = [
+      ["dashboards"],
+      ["projects"],
+      ["activities"],
+    ];
+
+    if (projectId) {
+      baseQueries.push(
+        ["projects", projectId],
+        ["activities", { projeto_id: projectId }]
+      );
     }
-    
-    // Invalidar dados específicos da área
-    if (activityData.area_id) {
-      invalidateQueries('AREA_RELATED', activityData.area_id);
-    }
+
+    invalidateQueries(baseQueries);
   }, [invalidateQueries]);
 
-  // Função para invalidar dados relacionados a um projeto
-  const invalidateProjectRelated = useCallback((projectId: string) => {
-    invalidateQueries('PROJECTS_ALL');
-    invalidateQueries('PROJECT_RELATED', projectId);
-    invalidateQueries('DASHBOARDS_ALL');
+  const invalidateAreaRelatedQueries = useCallback((areaId?: string) => {
+    const baseQueries = [
+      ["dashboards"],
+      ["areas"],
+      ["activities"],
+    ];
+
+    if (areaId) {
+      baseQueries.push(
+        ["areas", areaId],
+        ["activities", { area_id: areaId }]
+      );
+    }
+
+    invalidateQueries(baseQueries);
   }, [invalidateQueries]);
 
-  // Função para limpar cache antigo
-  const cleanupCache = useCallback(() => {
-    queryClient.clear();
-  }, [queryClient]);
-
-  // Função para obter dados do cache sem trigger de fetch
-  const getCachedData = useCallback(<T>(queryKey: readonly unknown[]): T | undefined => {
-    return queryClient.getQueryData(queryKey);
-  }, [queryClient]);
-
-  // Métricas do cache
-  const cacheMetrics = useMemo(() => {
-    const queryCache = queryClient.getQueryCache();
-    const queries = queryCache.getAll();
+  const refreshAllQueries = useCallback(() => {
+    const allQueries = [
+      ["activities", "paginated"],
+      ["activities"],
+      ["projects"],
+      ["areas"],
+      ["dashboards"],
+    ];
     
-    return {
-      totalQueries: queries.length,
-      staleQueries: queries.filter(q => q.isStale()).length,
-      loadingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
-      errorQueries: queries.filter(q => q.state.status === 'error').length,
-    };
-  }, [queryClient]);
+    invalidateQueries(allQueries);
+  }, [invalidateQueries]);
 
   return {
-    // Prefetching
-    prefetchCommonData,
-    
-    // Atualização de dados
-    updateQueryData,
-    
-    // Invalidação
-    invalidateQueries,
-    invalidateActivityRelated,
-    invalidateProjectRelated,
-    
-    // Cache management
-    getCachedData,
-    cleanupCache,
-    
-    // Métricas
-    cacheMetrics,
+    invalidateProjectRelatedQueries,
+    invalidateAreaRelatedQueries,
+    refreshAllQueries,
   };
 };

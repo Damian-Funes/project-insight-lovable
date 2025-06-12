@@ -30,7 +30,7 @@ export const useOptimizedForm = <T extends FieldValues>({
   const form = useForm<T>(optimizedConfig);
 
   // Função otimizada para reset com preservação de valores padrão
-  const optimizedReset = useCallback((values?: Partial<T>) => {
+  const optimizedReset = useCallback((values?: T) => {
     form.reset(values, { 
       keepDirty: false,
       keepErrors: false,
