@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut } from "lucide-react";
+import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +47,11 @@ const menuItems = [
     title: "Dashboards de Custos",
     url: "/cost-dashboard",
     icon: DollarSign,
+  },
+  {
+    title: "Gestão de Receitas",
+    url: "/revenue-management",
+    icon: Receipt,
   },
   {
     title: "Relatórios",

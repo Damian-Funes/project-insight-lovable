@@ -16,6 +16,7 @@ import Areas from "./pages/Areas";
 import AreaManagement from "./pages/AreaManagement";
 import Reports from "./pages/Reports";
 import CostDashboard from "./pages/CostDashboard";
+import RevenueManagement from "./pages/RevenueManagement";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,7 @@ const App = () => (
                           <Route path="/area-management" element={<AreaManagement />} />
                           <Route path="/reports" element={<Reports />} />
                           <Route path="/cost-dashboard" element={<CostDashboard />} />
+                          <Route path="/revenue-management" element={<RevenueManagement />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
