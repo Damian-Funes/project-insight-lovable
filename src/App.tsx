@@ -1,17 +1,18 @@
+
 import {
   BrowserRouter as Router,
   Route,
   Routes,
 } from "react-router-dom";
-import { Auth } from "@/pages/Auth";
-import { Index } from "@/pages";
-import { Projects } from "@/pages/Projects";
-import { Areas } from "@/pages/Areas";
-import { Activities } from "@/pages/Activities";
-import { Reports } from "@/pages/Reports";
-import { CostDashboard } from "@/pages/CostDashboard";
-import { AreaManagement } from "@/pages/AreaManagement";
-import { NotFound } from "@/pages/NotFound";
+import Auth from "@/pages/Auth";
+import { Index } from "@/pages/Index";
+import Projects from "@/pages/Projects";
+import Areas from "@/pages/Areas";
+import Activities from "@/pages/Activities";
+import Reports from "@/pages/Reports";
+import CostDashboard from "@/pages/CostDashboard";
+import AreaManagement from "@/pages/AreaManagement";
+import NotFound from "@/pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
