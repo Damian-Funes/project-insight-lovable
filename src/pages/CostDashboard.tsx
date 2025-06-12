@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CostChart } from "@/components/CostChart";
@@ -13,19 +14,20 @@ import { Loader2, TrendingUp, Building2, Filter, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const CostDashboard = () => {
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedArea, setSelectedArea] = useState<string>("all");
 
   const projectFilters = {
-    startDate: dateRange.from,
-    endDate: dateRange.to,
+    startDate,
+    endDate,
     projectId: selectedProject,
   };
 
   const areaFilters = {
-    startDate: dateRange.from,
-    endDate: dateRange.to,
+    startDate,
+    endDate,
     areaId: selectedArea,
   };
 
@@ -33,7 +35,8 @@ const CostDashboard = () => {
   const { data: areaCostData, isLoading: isLoadingAreas, error: areaError } = useCostsByArea(areaFilters);
 
   const clearFilters = () => {
-    setDateRange({});
+    setStartDate(undefined);
+    setEndDate(undefined);
     setSelectedProject("all");
     setSelectedArea("all");
   };
@@ -98,8 +101,10 @@ const CostDashboard = () => {
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <DateRangeFilter
-                dateRange={dateRange}
-                onDateRangeChange={setDateRange}
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
               />
             </div>
             <ProjectFilter

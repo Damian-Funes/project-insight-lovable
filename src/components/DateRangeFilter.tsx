@@ -8,22 +8,18 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 interface DateRangeFilterProps {
-  dateRange: { from?: Date; to?: Date };
-  onDateRangeChange: (range: { from?: Date; to?: Date }) => void;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  onStartDateChange: (date: Date | undefined) => void;
+  onEndDateChange: (date: Date | undefined) => void;
 }
 
 export const DateRangeFilter = ({
-  dateRange,
-  onDateRangeChange,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
 }: DateRangeFilterProps) => {
-  const handleStartDateChange = (date: Date | undefined) => {
-    onDateRangeChange({ ...dateRange, from: date });
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    onDateRangeChange({ ...dateRange, to: date });
-  };
-
   return (
     <div className="flex items-center gap-2">
       <div className="flex flex-col gap-1">
@@ -34,18 +30,18 @@ export const DateRangeFilter = ({
               variant="outline"
               className={cn(
                 "w-[140px] justify-start text-left font-normal",
-                !dateRange.from && "text-muted-foreground"
+                !startDate && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.from ? format(dateRange.from, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+              {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
-              selected={dateRange.from}
-              onSelect={handleStartDateChange}
+              selected={startDate}
+              onSelect={onStartDateChange}
               initialFocus
               className="pointer-events-auto"
             />
@@ -61,18 +57,18 @@ export const DateRangeFilter = ({
               variant="outline"
               className={cn(
                 "w-[140px] justify-start text-left font-normal",
-                !dateRange.to && "text-muted-foreground"
+                !endDate && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.to ? format(dateRange.to, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+              {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
-              selected={dateRange.to}
-              onSelect={handleEndDateChange}
+              selected={endDate}
+              onSelect={onEndDateChange}
               initialFocus
               className="pointer-events-auto"
             />
