@@ -12,7 +12,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const ProtectedLayout = () => {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   // Check for pending alerts when user logs in
@@ -34,7 +34,7 @@ export const ProtectedLayout = () => {
     await supabase.auth.signOut();
   };
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />;
   }
 
