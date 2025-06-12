@@ -71,6 +71,60 @@ export type Database = {
           },
         ]
       }
+      projecoes_manuais: {
+        Row: {
+          ajuste_manual: number
+          area_id: string | null
+          created_at: string
+          data_referencia: string
+          id: string
+          projeto_id: string | null
+          tipo: string
+          updated_at: string
+          usuario_id: string
+          valor_projetado: number
+        }
+        Insert: {
+          ajuste_manual?: number
+          area_id?: string | null
+          created_at?: string
+          data_referencia: string
+          id?: string
+          projeto_id?: string | null
+          tipo: string
+          updated_at?: string
+          usuario_id: string
+          valor_projetado?: number
+        }
+        Update: {
+          ajuste_manual?: number
+          area_id?: string | null
+          created_at?: string
+          data_referencia?: string
+          id?: string
+          projeto_id?: string | null
+          tipo?: string
+          updated_at?: string
+          usuario_id?: string
+          valor_projetado?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projecoes_manuais_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas_produtivas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projecoes_manuais_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projetos: {
         Row: {
           created_at: string

@@ -7,6 +7,7 @@ interface ProjectionChartProps {
   data: ProjectionData[];
   title: string;
   type: 'costs' | 'revenues';
+  adjustments?: { [key: string]: number };
 }
 
 const chartConfig = {
@@ -28,12 +29,18 @@ const chartConfig = {
   },
 };
 
-export const ProjectionChart = ({ data, title, type }: ProjectionChartProps) => {
-  const processedData = data.map(item => ({
-    ...item,
-    historical_value: !item.isProjected ? (type === 'costs' ? item.costs : item.revenues) : null,
-    projected_value: item.isProjected ? (type === 'costs' ? item.costs : item.revenues) : null,
-  }));
+export const ProjectionChart = ({ data, title, type, adjustments = {} }: ProjectionChartProps) => {
+  const processedData = data.map(item => {
+    const adjustment = adjustments[item.month] || 0;
+    const baseValue = type === 'costs' ? item.costs : item.revenues;
+    const adjustedValue = item.isProjected && adjustment !== 0 ? adjustment : baseValue;
+
+    return {
+      ...item,
+      historical_value: !item.isProjected ? (type === 'costs' ? item.costs : item.revenues) : null,
+      projected_value: item.isProjected ? adjustedValue : null,
+    };
+  });
 
   // Encontrar o índice onde começam as projeções
   const projectionStartIndex = data.findIndex(item => item.isProjected);

@@ -5,13 +5,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ProjectionChart } from "@/components/ProjectionChart";
-import { ProjectionTable } from "@/components/ProjectionTable";
+import { EditableProjectionTable } from "@/components/EditableProjectionTable";
 import { useFinancialProjection } from "@/hooks/useFinancialProjection";
 import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 
 const FinancialProjection = () => {
   const [analysisMonths, setAnalysisMonths] = useState<number>(6);
   const [projectionHorizon, setProjectionHorizon] = useState<number>(6);
+  const [costAdjustments, setCostAdjustments] = useState<{ [key: string]: number }>({});
+  const [revenueAdjustments, setRevenueAdjustments] = useState<{ [key: string]: number }>({});
 
   const { data: projectionResult, isLoading, error } = useFinancialProjection({
     analysisMonths,
@@ -143,12 +145,14 @@ const FinancialProjection = () => {
             data={projectionData} 
             title="Tendência e Projeção de Custos"
             type="costs"
+            adjustments={costAdjustments}
           />
           <Separator />
-          <ProjectionTable 
+          <EditableProjectionTable 
             data={projectionData}
             title="Custos"
-            type="costs"
+            type="custos"
+            onProjectionChange={setCostAdjustments}
           />
         </CardContent>
       </Card>
@@ -166,12 +170,14 @@ const FinancialProjection = () => {
             data={projectionData} 
             title="Tendência e Projeção de Receitas"
             type="revenues"
+            adjustments={revenueAdjustments}
           />
           <Separator />
-          <ProjectionTable 
+          <EditableProjectionTable 
             data={projectionData}
             title="Receitas"
-            type="revenues"
+            type="receitas"
+            onProjectionChange={setRevenueAdjustments}
           />
         </CardContent>
       </Card>
