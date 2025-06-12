@@ -12,7 +12,7 @@ interface VirtualizedTableProps {
   }>;
   itemHeight?: number;
   height?: number;
-  width?: number;
+  width?: number | string;
 }
 
 const TableRowItem = memo(({ index, style, data }: any) => {
