@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings, Tv } from "lucide-react";
+import { Home, BarChart3, Users, Building2, DollarSign, TrendingUp, Bell, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -18,42 +18,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
 
-// Menu items.
+// Menu items - apenas funcionalidades financeiras
 const items = [
   {
-    title: "Dashboard",
+    title: "Dashboard Financeiro",
     url: "/dashboard",
     icon: Home,
-  },
-  {
-    title: "Atividades",
-    url: "/activities",
-    icon: FileText,
-  },
-  {
-    title: "Projetos",
-    url: "/projects",
-    icon: Building2,
-  },
-  {
-    title: "Áreas Produtivas",
-    url: "/areas",
-    icon: Users,
-  },
-  {
-    title: "Gestão de Áreas",
-    url: "/area-management",
-    icon: Settings,
-  },
-  {
-    title: "TV Corporativa",
-    url: "/tv-corporativa",
-    icon: Tv,
-  },
-  {
-    title: "Relatórios",
-    url: "/reports",
-    icon: BarChart3,
   },
   {
     title: "Dashboard de Custos",
@@ -71,13 +41,23 @@ const items = [
     icon: TrendingUp,
   },
   {
-    title: "Modelos Preditivos",
-    url: "/predictive-models",
+    title: "Análise de Cenários",
+    url: "/scenario-analysis",
     icon: BarChart3,
   },
   {
-    title: "Análise de Cenários",
-    url: "/scenario-analysis",
+    title: "Áreas Produtivas",
+    url: "/areas",
+    icon: Users,
+  },
+  {
+    title: "Gestão de Áreas",
+    url: "/area-management",
+    icon: Settings,
+  },
+  {
+    title: "Relatórios",
+    url: "/reports",
     icon: BarChart3,
   },
   {
@@ -95,7 +75,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-sidebar-foreground">
-            Gestão de Projetos
+            Gestão Financeira
           </h2>
           <NotificationBell />
         </div>

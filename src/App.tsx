@@ -10,23 +10,19 @@ import { ProtectedLayout } from "@/components/ProtectedLayout";
 import Index from "@/pages/Index";
 import { DashboardSkeleton, TableSkeleton } from "@/components/ui/optimized-loading";
 
-// Lazy loading otimizado - páginas mais pesadas
+// Lazy loading otimizado - páginas financeiras
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const CostDashboard = React.lazy(() => import("@/pages/CostDashboard"));
 const FinancialProjection = React.lazy(() => import("@/pages/FinancialProjection"));
-const TvCorporativa = React.lazy(() => import("@/pages/TvCorporativa"));
 
-// Páginas mais leves - import direto
-const Projects = React.lazy(() => import("@/pages/Projects"));
+// Páginas de gestão - import direto
 const Areas = React.lazy(() => import("@/pages/Areas"));
-const Activities = React.lazy(() => import("@/pages/Activities"));
 const AreaManagement = React.lazy(() => import("@/pages/AreaManagement"));
 const RevenueManagement = React.lazy(() => import("@/pages/RevenueManagement"));
 const ScenarioAnalysis = React.lazy(() => import("@/pages/ScenarioAnalysis"));
 const AlertsConfiguration = React.lazy(() => import("@/pages/AlertsConfiguration"));
 const Reports = React.lazy(() => import("@/pages/Reports"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
-const PredictiveModels = React.lazy(() => import("@/pages/PredictiveModels"));
 
 // Diferentes skeletons para diferentes tipos de página
 const DashboardLoader = () => <DashboardSkeleton />;
@@ -83,22 +79,6 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="tv-corporativa" 
-                  element={
-                    <Suspense fallback={<DashboardLoader />}>
-                      <TvCorporativa />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="projects" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <Projects />
-                    </Suspense>
-                  } 
-                />
-                <Route 
                   path="areas" 
                   element={
                     <Suspense fallback={<TableLoader />}>
@@ -115,14 +95,6 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="activities" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <Activities />
-                    </Suspense>
-                  } 
-                />
-                <Route 
                   path="revenue-management" 
                   element={
                     <Suspense fallback={<TableLoader />}>
@@ -135,14 +107,6 @@ function App() {
                   element={
                     <Suspense fallback={<DashboardLoader />}>
                       <ScenarioAnalysis />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="predictive-models" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <PredictiveModels />
                     </Suspense>
                   } 
                 />

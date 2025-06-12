@@ -19,9 +19,9 @@ import {
   AreaChart,
   Area
 } from "recharts";
-import { TrendingUp, TrendingDown, DollarSign, Clock, Users, AlertTriangle } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Users, Building2, AlertTriangle } from "lucide-react";
 
-// Memoizar dados mock para evitar recriação desnecessária
+// Dados mock financeiros
 const mockData = {
   kpis: [
     {
@@ -41,20 +41,20 @@ const mockData = {
       color: "text-metric-cost"
     },
     {
-      title: "Horas Trabalhadas",
-      value: "2,847h",
-      change: "+8.1%",
+      title: "Margem de Lucro",
+      value: "33.1%",
+      change: "+5.8%",
       trend: "up" as const,
-      icon: Clock,
-      color: "text-metric-efficiency"
+      icon: TrendingUp,
+      color: "text-metric-profit"
     },
     {
-      title: "Taxa de Retrabalho",
-      value: "8.4%",
-      change: "+2.1%",
+      title: "Áreas Ativas",
+      value: "8",
+      change: "+1",
       trend: "up" as const,
-      icon: AlertTriangle,
-      color: "text-metric-warning"
+      icon: Building2,
+      color: "text-metric-efficiency"
     }
   ],
   monthlyData: [
@@ -65,17 +65,17 @@ const mockData = {
     { month: "May", receita: 55000, custo: 32000, lucro: 23000 },
     { month: "Jun", receita: 67000, custo: 38000, lucro: 29000 }
   ],
-  projectCosts: [
-    { name: "Projeto Alpha", value: 35, color: "#3B82F6" },
-    { name: "Projeto Beta", value: 28, color: "#8B5CF6" },
-    { name: "Projeto Gamma", value: 22, color: "#10B981" },
-    { name: "Projeto Delta", value: 15, color: "#F59E0B" }
+  costDistribution: [
+    { name: "Desenvolvimento", value: 35, color: "#3B82F6" },
+    { name: "Design", value: 28, color: "#8B5CF6" },
+    { name: "QA", value: 22, color: "#10B981" },
+    { name: "DevOps", value: 15, color: "#F59E0B" }
   ],
-  areaEfficiency: [
-    { area: "Desenvolvimento", horas: 180, custo: 25200 },
-    { area: "Design", horas: 120, custo: 14400 },
-    { area: "QA", horas: 95, custo: 9500 },
-    { area: "DevOps", horas: 75, custo: 11250 }
+  areaMetrics: [
+    { area: "Desenvolvimento", custoHora: 45, horasMes: 180 },
+    { area: "Design", custoHora: 40, horasMes: 120 },
+    { area: "QA", custoHora: 35, horasMes: 95 },
+    { area: "DevOps", custoHora: 50, horasMes: 75 }
   ]
 };
 
@@ -107,7 +107,7 @@ const KPICard = React.memo(({ kpi }: { kpi: typeof mockData.kpis[0] }) => (
 
 KPICard.displayName = "KPICard";
 
-// Componente de chart memoizado
+// Componente de chart de receita memoizado
 const RevenueChart = React.memo(() => (
   <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={mockData.monthlyData}>
@@ -153,11 +153,11 @@ const RevenueChart = React.memo(() => (
 
 RevenueChart.displayName = "RevenueChart";
 
-const ProjectCostsChart = React.memo(() => (
+const CostDistributionChart = React.memo(() => (
   <ResponsiveContainer width="100%" height={300}>
     <PieChart>
       <Pie
-        data={mockData.projectCosts}
+        data={mockData.costDistribution}
         cx="50%"
         cy="50%"
         innerRadius={60}
@@ -165,7 +165,7 @@ const ProjectCostsChart = React.memo(() => (
         paddingAngle={5}
         dataKey="value"
       >
-        {mockData.projectCosts.map((entry, index) => (
+        {mockData.costDistribution.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={entry.color} />
         ))}
       </Pie>
@@ -180,11 +180,11 @@ const ProjectCostsChart = React.memo(() => (
   </ResponsiveContainer>
 ));
 
-ProjectCostsChart.displayName = "ProjectCostsChart";
+CostDistributionChart.displayName = "CostDistributionChart";
 
-const EfficiencyChart = React.memo(() => (
+const AreaMetricsChart = React.memo(() => (
   <ResponsiveContainer width="100%" height={300}>
-    <BarChart data={mockData.areaEfficiency}>
+    <BarChart data={mockData.areaMetrics}>
       <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
       <XAxis dataKey="area" stroke="#94A3B8" />
       <YAxis stroke="#94A3B8" />
@@ -195,24 +195,23 @@ const EfficiencyChart = React.memo(() => (
           borderRadius: '8px'
         }} 
       />
-      <Bar dataKey="horas" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-      <Bar dataKey="custo" fill="#10B981" radius={[4, 4, 0, 0]} />
+      <Bar dataKey="custoHora" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
     </BarChart>
   </ResponsiveContainer>
 ));
 
-EfficiencyChart.displayName = "EfficiencyChart";
+AreaMetricsChart.displayName = "AreaMetricsChart";
 
 const Dashboard = React.memo(() => {
   // Memoizar a legenda do gráfico de pizza
-  const projectLegend = useMemo(() => 
-    mockData.projectCosts.map((project, index) => (
+  const costLegend = useMemo(() => 
+    mockData.costDistribution.map((area, index) => (
       <div key={index} className="flex items-center space-x-2">
         <div 
           className="w-3 h-3 rounded-full" 
-          style={{ backgroundColor: project.color }}
+          style={{ backgroundColor: area.color }}
         />
-        <span className="text-sm text-muted-foreground">{project.name}</span>
+        <span className="text-sm text-muted-foreground">{area.name}</span>
       </div>
     )), []);
 
@@ -223,7 +222,7 @@ const Dashboard = React.memo(() => {
           <SidebarTrigger />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Dashboard Financeiro</h1>
-            <p className="text-muted-foreground">Visão geral dos indicadores estratégicos</p>
+            <p className="text-muted-foreground">Visão geral dos indicadores financeiros estratégicos</p>
           </div>
         </div>
         <Badge variant="outline" className="bg-metric-profit/10 text-metric-profit border-metric-profit">
@@ -250,26 +249,26 @@ const Dashboard = React.memo(() => {
           </CardContent>
         </Card>
 
-        {/* Project Costs Distribution */}
+        {/* Cost Distribution by Area */}
         <Card className="chart-container">
           <CardHeader>
-            <CardTitle className="text-foreground">Distribuição de Custos por Projeto</CardTitle>
+            <CardTitle className="text-foreground">Distribuição de Custos por Área</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProjectCostsChart />
+            <CostDistributionChart />
             <div className="flex flex-wrap justify-center gap-4 mt-4">
-              {projectLegend}
+              {costLegend}
             </div>
           </CardContent>
         </Card>
 
-        {/* Area Efficiency */}
+        {/* Area Cost Metrics */}
         <Card className="chart-container lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-foreground">Eficiência por Área Produtiva</CardTitle>
+            <CardTitle className="text-foreground">Custo por Hora por Área Produtiva</CardTitle>
           </CardHeader>
           <CardContent>
-            <EfficiencyChart />
+            <AreaMetricsChart />
           </CardContent>
         </Card>
       </div>
