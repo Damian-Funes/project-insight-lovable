@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Home, BarChart3, Users, Building2, FileText, DollarSign, TrendingUp, Bell, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +22,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 const items = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: Home,
   },
   {
@@ -65,6 +66,16 @@ const items = [
     icon: TrendingUp,
   },
   {
+    title: "Modelos Preditivos",
+    url: "/predictive-models",
+    icon: BarChart3,
+  },
+  {
+    title: "Análise de Cenários",
+    url: "/scenario-analysis",
+    icon: BarChart3,
+  },
+  {
     title: "Configuração de Alertas",
     url: "/alerts-configuration",
     icon: Bell,
@@ -92,10 +103,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
