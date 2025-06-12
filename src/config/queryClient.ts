@@ -14,3 +14,32 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Query keys centralizadas
+export const QUERY_KEYS = {
+  ACTIVITIES_PAGINATED: ['activities', 'paginated'] as const,
+  ACTIVITIES_ALL: ['activities'] as const,
+  PROJECTS_ALL: ['projects'] as const,
+  AREAS_ALL: ['areas'] as const,
+  DASHBOARDS_ALL: ['dashboards'] as const,
+  OPTIMIZED_AREAS: ['areas', 'optimized'] as const,
+  OPTIMIZED_PROJECTS: ['projects', 'optimized'] as const,
+} as const;
+
+// Padrões de invalidação
+export const INVALIDATION_PATTERNS = {
+  ACTIVITIES_ALL: () => [QUERY_KEYS.ACTIVITIES_ALL, QUERY_KEYS.ACTIVITIES_PAGINATED],
+  PROJECTS_ALL: () => [QUERY_KEYS.PROJECTS_ALL],
+  AREAS_ALL: () => [QUERY_KEYS.AREAS_ALL],
+  DASHBOARDS_ALL: () => [QUERY_KEYS.DASHBOARDS_ALL],
+  PROJECT_RELATED: (projectId: string) => [
+    ['projects', projectId],
+    ['activities', { projeto_id: projectId }],
+    QUERY_KEYS.DASHBOARDS_ALL,
+  ],
+  AREA_RELATED: (areaId: string) => [
+    ['areas', areaId],
+    ['activities', { area_id: areaId }],
+    QUERY_KEYS.DASHBOARDS_ALL,
+  ],
+} as const;

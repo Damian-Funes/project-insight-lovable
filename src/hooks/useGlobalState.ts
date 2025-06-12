@@ -40,8 +40,14 @@ export const useGlobalState = () => {
 
   // Função para invalidação seletiva
   const invalidateQueries = useCallback((pattern: keyof typeof INVALIDATION_PATTERNS, ...args: unknown[]) => {
-    const patternFunction = INVALIDATION_PATTERNS[pattern] as (...args: unknown[]) => readonly unknown[][];
-    const queryKeys = patternFunction(...args);
+    const patternFunction = INVALIDATION_PATTERNS[pattern];
+    let queryKeys: readonly unknown[][];
+    
+    if (typeof patternFunction === 'function') {
+      queryKeys = patternFunction(...args);
+    } else {
+      queryKeys = patternFunction();
+    }
     
     queryKeys.forEach(queryKey => {
       queryClient.invalidateQueries({ queryKey });
