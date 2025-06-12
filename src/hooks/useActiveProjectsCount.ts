@@ -12,32 +12,43 @@ export const useActiveProjectsCount = (areaId: string) => {
         return 0;
       }
 
-      // Buscar projetos que têm atividades registradas para esta área e estão ativos
-      const { data, error } = await supabase
-        .from("projetos")
-        .select(`
-          id,
-          registros_atividades!inner (
-            area_id
-          )
-        `)
-        .eq("status_projeto", "Ativo")
-        .eq("registros_atividades.area_id", areaId);
+      try {
+        // Query otimizada: buscar apenas IDs únicos dos projetos
+        const { data, error } = await supabase
+          .from("projetos")
+          .select(`
+            id,
+            registros_atividades!inner (
+              area_id
+            )
+          `)
+          .eq("status_projeto", "Ativo")
+          .eq("registros_atividades.area_id", areaId);
 
-      if (error) {
-        console.error("Erro ao buscar projetos ativos:", error);
+        if (error) {
+          console.error("Erro ao buscar projetos ativos:", error);
+          throw new Error(`Falha ao contar projetos ativos: ${error.message}`);
+        }
+
+        // Contar projetos únicos
+        const uniqueProjects = new Set(data.map(project => project.id));
+        const activeProjectsCount = uniqueProjects.size;
+
+        console.log("Projetos ativos encontrados:", activeProjectsCount);
+        return activeProjectsCount;
+      } catch (error) {
+        console.error("Erro na query projetos ativos:", error);
         throw error;
       }
-
-      // Contar projetos únicos
-      const uniqueProjects = new Set(data.map(project => project.id));
-      const activeProjectsCount = uniqueProjects.size;
-
-      console.log("Projetos ativos encontrados:", activeProjectsCount);
-      return activeProjectsCount;
     },
     enabled: !!areaId && areaId !== "all",
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
+    retry: (failureCount, error) => {
+      if (failureCount >= 2) return false;
+      if (error?.message?.includes('4')) return false;
+      return true;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
