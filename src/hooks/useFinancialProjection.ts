@@ -128,11 +128,11 @@ function generateOptimizedMockProjections(analysisMonths: number, projectionHori
 
 // Função auxiliar para processar dados reais com correção de tipos
 function processProjectionData(costData: any[], revenueData: any[], analysisMonths: number, projectionHorizon: number, endDate: Date) {
-  // Agrupar custos por mês com conversão de tipos explícita
+  // Agrupar custos por mês com conversão de tipos explícita e validação
   const monthlyCosts = costData.reduce((acc, record) => {
     const month = format(new Date(record.data_registro), 'yyyy-MM');
     
-    // Conversão explícita para number com validação
+    // Conversão explícita para number com validação rigorosa
     const horasGastas = Number(record.horas_gastas) || 0;
     const custoHora = Number(record.areas_produtivas?.custo_hora_padrao) || 0;
     const cost = horasGastas * custoHora;
@@ -143,11 +143,11 @@ function processProjectionData(costData: any[], revenueData: any[], analysisMont
     return acc;
   }, {} as Record<string, number>);
 
-  // Agrupar receitas por mês com conversão de tipos explícita
+  // Agrupar receitas por mês com conversão de tipos explícita e validação
   const monthlyRevenues = revenueData.reduce((acc, record) => {
     const month = format(new Date(record.data_receita), 'yyyy-MM');
     
-    // Conversão explícita para number com validação
+    // Conversão explícita para number com validação rigorosa
     const revenue = Number(record.valor_receita) || 0;
     
     if (!acc[month]) acc[month] = 0;
@@ -156,16 +156,23 @@ function processProjectionData(costData: any[], revenueData: any[], analysisMont
     return acc;
   }, {} as Record<string, number>);
 
-  // Calcular médias mensais com validação
-  const costValues = Object.values(monthlyCosts).filter(cost => cost > 0);
-  const revenueValues = Object.values(monthlyRevenues).filter(revenue => revenue > 0);
+  // Calcular médias mensais com validação e conversão de tipos
+  const costValues = Object.values(monthlyCosts).filter((cost): cost is number => {
+    const numCost = Number(cost);
+    return !isNaN(numCost) && numCost > 0;
+  });
+  
+  const revenueValues = Object.values(monthlyRevenues).filter((revenue): revenue is number => {
+    const numRevenue = Number(revenue);
+    return !isNaN(numRevenue) && numRevenue > 0;
+  });
   
   const avgMonthlyCost = costValues.length > 0 
-    ? costValues.reduce((sum, cost) => sum + cost, 0) / costValues.length
+    ? costValues.reduce((sum, cost) => Number(sum) + Number(cost), 0) / costValues.length
     : 47000;
   
   const avgMonthlyRevenue = revenueValues.length > 0
-    ? revenueValues.reduce((sum, revenue) => sum + revenue, 0) / revenueValues.length
+    ? revenueValues.reduce((sum, revenue) => Number(sum) + Number(revenue), 0) / revenueValues.length
     : 55000;
 
   // Gerar dados históricos + projeções
@@ -192,8 +199,8 @@ function processProjectionData(costData: any[], revenueData: any[], analysisMont
     
     projectionData.push({
       month: monthLabel,
-      costs: Math.round(avgMonthlyCost * 100) / 100,
-      revenues: Math.round(avgMonthlyRevenue * 100) / 100,
+      costs: Math.round(Number(avgMonthlyCost) * 100) / 100,
+      revenues: Math.round(Number(avgMonthlyRevenue) * 100) / 100,
       isProjected: true
     });
   }
@@ -201,8 +208,8 @@ function processProjectionData(costData: any[], revenueData: any[], analysisMont
   return {
     data: projectionData,
     averages: {
-      monthlyCost: Math.round(avgMonthlyCost * 100) / 100,
-      monthlyRevenue: Math.round(avgMonthlyRevenue * 100) / 100
+      monthlyCost: Math.round(Number(avgMonthlyCost) * 100) / 100,
+      monthlyRevenue: Math.round(Number(avgMonthlyRevenue) * 100) / 100
     }
   };
 }
