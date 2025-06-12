@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Edit, Trash2, Play, Pause, Brain, TrendingUp } from "lucide-react";
+import { Plus, Edit, Trash2, Play, Pause, Brain, TrendingUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PredictiveModelFormModal } from "@/components/PredictiveModelFormModal";
 import { CostPredictionDashboard } from "@/components/CostPredictionDashboard";
+import { AnomalyDetectionDashboard } from "@/components/AnomalyDetectionDashboard";
 import { usePredictiveModels } from "@/hooks/usePredictiveModels";
 import { Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
@@ -82,7 +83,7 @@ export default function PredictiveModels() {
             Análise Preditiva
           </h1>
           <p className="text-muted-foreground mt-2">
-            Gerencie modelos de machine learning e visualize previsões de custos
+            Gerencie modelos de machine learning, visualize previsões de custos e detecte anomalias
           </p>
         </div>
         <Button onClick={handleCreateNew} className="flex items-center gap-2">
@@ -97,6 +98,10 @@ export default function PredictiveModels() {
             <TrendingUp className="h-4 w-4" />
             Previsão de Custos
           </TabsTrigger>
+          <TabsTrigger value="anomalies" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Detecção de Anomalias
+          </TabsTrigger>
           <TabsTrigger value="models" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
             Modelos Preditivos
@@ -105,6 +110,10 @@ export default function PredictiveModels() {
 
         <TabsContent value="predictions">
           <CostPredictionDashboard />
+        </TabsContent>
+
+        <TabsContent value="anomalies">
+          <AnomalyDetectionDashboard />
         </TabsContent>
 
         <TabsContent value="models">

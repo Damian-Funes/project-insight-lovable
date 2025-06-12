@@ -470,6 +470,14 @@ export type Database = {
         Args: { user_id: string }
         Returns: undefined
       }
+      detectar_anomalias: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      executar_deteccao_anomalias: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
     }
     Enums: {
       tipo_alerta:
