@@ -66,6 +66,47 @@ export type Database = {
         }
         Relationships: []
       }
+      cenarios_financeiros: {
+        Row: {
+          ativo: boolean
+          data_criacao: string
+          descricao_cenario: string | null
+          id: string
+          nome_cenario: string
+          parametros_simulacao: Json | null
+          resultados_simulacao: Json | null
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          data_criacao?: string
+          descricao_cenario?: string | null
+          id?: string
+          nome_cenario: string
+          parametros_simulacao?: Json | null
+          resultados_simulacao?: Json | null
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          data_criacao?: string
+          descricao_cenario?: string | null
+          id?: string
+          nome_cenario?: string
+          parametros_simulacao?: Json | null
+          resultados_simulacao?: Json | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cenarios_financeiros_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificacoes: {
         Row: {
           alerta_id: string | null
