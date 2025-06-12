@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Monitor, Tv, FolderOpen, RotateCcw, TrendingUp } from "lucide-react";
+import { Monitor, Tv, FolderOpen, RotateCcw, TrendingUp, Clock, Activity } from "lucide-react";
 import { AreaFilter } from "@/components/AreaFilter";
 import { useAreas } from "@/hooks/useAreas";
 import { useReworkMetrics } from "@/hooks/useReworkMetrics";
 import { useAreaProjects } from "@/hooks/useAreaProjects";
+import { useTimeMetrics } from "@/hooks/useTimeMetrics";
+import { useActiveProjectsCount } from "@/hooks/useActiveProjectsCount";
 import { ReworkChart } from "@/components/ReworkChart";
 import { ProjectProgressCard } from "@/components/ProjectProgressCard";
 
@@ -17,6 +19,8 @@ const TvCorporativa = () => {
   const { data: areas } = useAreas();
   const { data: reworkMetrics, isLoading: isLoadingRework } = useReworkMetrics(selectedArea);
   const { data: areaProjects, isLoading: isLoadingProjects } = useAreaProjects(selectedArea);
+  const { data: timeMetrics, isLoading: isLoadingTime } = useTimeMetrics(selectedArea);
+  const { data: activeProjectsCount, isLoading: isLoadingActiveProjects } = useActiveProjectsCount(selectedArea);
 
   const selectedAreaName = selectedArea === "all" 
     ? "Nenhuma Área Selecionada" 
@@ -37,6 +41,16 @@ const TvCorporativa = () => {
       id: 'projects',
       title: 'Projetos Ativos',
       icon: FolderOpen,
+    },
+    {
+      id: 'time-metrics',
+      title: 'Horas Registradas',
+      icon: Clock,
+    },
+    {
+      id: 'active-projects-count',
+      title: 'Projetos em Andamento',
+      icon: Activity,
     },
     {
       id: 'performance',
@@ -163,6 +177,79 @@ const TvCorporativa = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        );
+
+      case 'time-metrics':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="bg-card border border-border">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-chart-primary flex items-center space-x-3">
+                  <Clock className="w-8 h-8" />
+                  <span>Horas Registradas Hoje</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                {isLoadingTime ? (
+                  <div className="text-6xl font-bold text-muted-foreground mb-2">--</div>
+                ) : (
+                  <div className="text-6xl font-bold text-chart-primary mb-2">
+                    {(timeMetrics?.hoursToday || 0).toFixed(1)}h
+                  </div>
+                )}
+                <p className="text-xl text-muted-foreground">
+                  Registradas hoje
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border border-border">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-chart-secondary flex items-center space-x-3">
+                  <Clock className="w-8 h-8" />
+                  <span>Horas Registradas (Semana)</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                {isLoadingTime ? (
+                  <div className="text-6xl font-bold text-muted-foreground mb-2">--</div>
+                ) : (
+                  <div className="text-6xl font-bold text-chart-secondary mb-2">
+                    {(timeMetrics?.hoursThisWeek || 0).toFixed(1)}h
+                  </div>
+                )}
+                <p className="text-xl text-muted-foreground">
+                  Registradas nesta semana
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'active-projects-count':
+        return (
+          <div className="flex justify-center">
+            <Card className="bg-card border border-border w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-chart-tertiary flex items-center space-x-3 justify-center">
+                  <Activity className="w-8 h-8" />
+                  <span>Projetos em Andamento</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                {isLoadingActiveProjects ? (
+                  <div className="text-8xl font-bold text-muted-foreground mb-2">--</div>
+                ) : (
+                  <div className="text-8xl font-bold text-chart-tertiary mb-2">
+                    {activeProjectsCount || 0}
+                  </div>
+                )}
+                <p className="text-xl text-muted-foreground text-center">
+                  Projetos ativos nesta área
+                </p>
+              </CardContent>
+            </Card>
           </div>
         );
         
