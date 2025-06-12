@@ -1,22 +1,24 @@
 
-import { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CostChart } from "@/components/CostChart";
-import { CostTable } from "@/components/CostTable";
-import { AreaCostChart } from "@/components/AreaCostChart";
-import { AreaCostTable } from "@/components/AreaCostTable";
-import { ProfitabilityChart } from "@/components/ProfitabilityChart";
-import { ProfitabilityTable } from "@/components/ProfitabilityTable";
-import { DateRangeFilter } from "@/components/DateRangeFilter";
-import { ProjectFilter } from "@/components/ProjectFilter";
-import { AreaFilter } from "@/components/AreaFilter";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCostsByProject } from "@/hooks/useCostsByProject";
 import { useCostsByArea } from "@/hooks/useCostsByArea";
 import { useProfitabilityData } from "@/hooks/useProfitabilityData";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Loader2, TrendingUp, Building2, Filter, Calendar, DollarSign, TrendingDown, Database, FileText, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, TrendingUp, Building2, AlertCircle, Database, FileText, DollarSign } from "lucide-react";
+import { DashboardKPIs } from "@/components/dashboard/DashboardKPIs";
+import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
+import { OptimizedLoadingSpinner } from "@/components/OptimizedLoadingSpinner";
+
+// Lazy loading dos componentes pesados
+const CostChart = lazy(() => import("@/components/CostChart").then(module => ({ default: module.CostChart })));
+const AreaCostChart = lazy(() => import("@/components/AreaCostChart").then(module => ({ default: module.AreaCostChart })));
+const ProfitabilityChart = lazy(() => import("@/components/ProfitabilityChart").then(module => ({ default: module.ProfitabilityChart })));
+const CostTable = lazy(() => import("@/components/CostTable").then(module => ({ default: module.CostTable })));
+const AreaCostTable = lazy(() => import("@/components/AreaCostTable").then(module => ({ default: module.AreaCostTable })));
+const ProfitabilityTable = lazy(() => import("@/components/ProfitabilityTable").then(module => ({ default: module.ProfitabilityTable })));
 
 const CostDashboard = () => {
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -109,7 +111,6 @@ const CostDashboard = () => {
   }
 
   const totalCost = costData?.reduce((sum, project) => sum + project.custo_total, 0) || 0;
-  const totalAreaCost = areaCostData?.reduce((sum, area) => sum + area.custo_total, 0) || 0;
   const totalRevenue = profitabilityData?.reduce((sum, project) => sum + project.receita_total, 0) || 0;
   const totalProfit = profitabilityData?.reduce((sum, project) => sum + project.lucro, 0) || 0;
 
@@ -144,116 +145,29 @@ const CostDashboard = () => {
         </Alert>
       )}
 
-      {/* Filtros */}
-      <Card className="border-l-4 border-l-chart-primary">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-chart-primary" />
-            <CardTitle className="text-lg">Filtros de Análise</CardTitle>
-          </div>
-          <CardDescription>
-            Utilize os filtros abaixo para refinar sua análise de custos e rentabilidade
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <DateRangeFilter
-                startDate={startDate}
-                endDate={endDate}
-                onStartDateChange={setStartDate}
-                onEndDateChange={setEndDate}
-              />
-            </div>
-            <ProjectFilter
-              selectedProject={selectedProject}
-              onProjectChange={setSelectedProject}
-            />
-            <AreaFilter
-              selectedArea={selectedArea}
-              onAreaChange={setSelectedArea}
-            />
-            <Button 
-              variant="outline" 
-              onClick={clearFilters}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Limpar Filtros
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filtros - Componente memoizado */}
+      <DashboardFilters
+        startDate={startDate}
+        endDate={endDate}
+        selectedProject={selectedProject}
+        selectedArea={selectedArea}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onProjectChange={setSelectedProject}
+        onAreaChange={setSelectedArea}
+        onClearFilters={clearFilters}
+      />
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-chart-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Receita Total
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-chart-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-chart-primary">
-              R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {hasProfitabilityData ? 'Total de receitas dos projetos' : 'Nenhuma receita cadastrada'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-chart-secondary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Custo Total
-            </CardTitle>
-            <TrendingDown className="h-4 w-4 text-chart-secondary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-chart-secondary">
-              R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {hasProjectData ? 'Total de custos dos projetos' : 'Nenhum custo calculado'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-chart-accent">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Lucro Total
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-chart-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              R$ {totalProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {hasProfitabilityData ? 'Receita menos custos' : 'Dados insuficientes'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-chart-highlight">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Margem Média
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-chart-highlight" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-chart-highlight">
-              {totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0.0'}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {totalRevenue > 0 ? 'Margem de lucro geral' : 'Sem dados para cálculo'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* KPIs - Componente memoizado */}
+      <DashboardKPIs
+        totalRevenue={totalRevenue}
+        totalCost={totalCost}
+        totalProfit={totalProfit}
+        hasProfitabilityData={hasProfitabilityData}
+        hasProjectData={hasProjectData}
+      />
 
-      {/* Gráfico de Rentabilidade */}
+      {/* Gráfico de Rentabilidade - Lazy loaded */}
       <Card className="border-t-4 border-t-chart-accent">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -266,7 +180,9 @@ const CostDashboard = () => {
         </CardHeader>
         <CardContent>
           {hasProfitabilityData ? (
-            <ProfitabilityChart data={profitabilityData} />
+            <Suspense fallback={<OptimizedLoadingSpinner />}>
+              <ProfitabilityChart data={profitabilityData} />
+            </Suspense>
           ) : (
             <div className="flex items-center justify-center h-[400px] text-muted-foreground">
               <div className="text-center">
@@ -279,7 +195,7 @@ const CostDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Gráficos de Custo */}
+      {/* Gráficos de Custo - Lazy loaded */}
       <div className="grid gap-6 lg:grid-cols-1">
         <Card className="border-t-4 border-t-chart-primary">
           <CardHeader>
@@ -293,7 +209,9 @@ const CostDashboard = () => {
           </CardHeader>
           <CardContent>
             {hasProjectData ? (
-              <CostChart data={costData} />
+              <Suspense fallback={<OptimizedLoadingSpinner />}>
+                <CostChart data={costData} />
+              </Suspense>
             ) : (
               <div className="flex items-center justify-center h-[400px] text-muted-foreground">
                 <div className="text-center">
@@ -318,7 +236,9 @@ const CostDashboard = () => {
           </CardHeader>
           <CardContent>
             {hasAreaData ? (
-              <AreaCostChart data={areaCostData} />
+              <Suspense fallback={<OptimizedLoadingSpinner />}>
+                <AreaCostChart data={areaCostData} />
+              </Suspense>
             ) : (
               <div className="flex items-center justify-center h-[400px] text-muted-foreground">
                 <div className="text-center">
@@ -332,9 +252,8 @@ const CostDashboard = () => {
         </Card>
       </div>
 
-      {/* Tabelas */}
+      {/* Tabelas - Lazy loaded */}
       <div className="grid gap-6">
-        {/* Tabela de Rentabilidade */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -346,11 +265,12 @@ const CostDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ProfitabilityTable data={profitabilityData} />
+            <Suspense fallback={<OptimizedLoadingSpinner />}>
+              <ProfitabilityTable data={profitabilityData} />
+            </Suspense>
           </CardContent>
         </Card>
 
-        {/* Tabelas de Custo */}
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
@@ -363,9 +283,12 @@ const CostDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CostTable data={costData} />
+              <Suspense fallback={<OptimizedLoadingSpinner />}>
+                <CostTable data={costData} />
+              </Suspense>
             </CardContent>
           </Card>
+          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -377,7 +300,9 @@ const CostDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AreaCostTable data={areaCostData} />
+              <Suspense fallback={<OptimizedLoadingSpinner />}>
+                <AreaCostTable data={areaCostData} />
+              </Suspense>
             </CardContent>
           </Card>
         </div>
