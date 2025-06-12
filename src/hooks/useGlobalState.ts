@@ -38,19 +38,22 @@ export const useGlobalState = () => {
     queryClient.setQueryData(queryKey, updater);
   }, [queryClient]);
 
-  // Função para invalidação seletiva com tipos corrigidos
+  // Função para invalidação seletiva com tipos simplificados
   const invalidateQueries = useCallback((pattern: keyof typeof INVALIDATION_PATTERNS, ...args: unknown[]) => {
-    const patternFunction = INVALIDATION_PATTERNS[pattern];
-    let queryKeys: readonly unknown[][];
+    let queryKeys: unknown[][] = [];
     
     if (pattern === 'PROJECT_RELATED' && args.length > 0) {
-      queryKeys = INVALIDATION_PATTERNS.PROJECT_RELATED(args[0] as string);
+      const projectKeys = INVALIDATION_PATTERNS.PROJECT_RELATED(args[0] as string);
+      queryKeys = projectKeys.map(key => Array.from(key));
     } else if (pattern === 'AREA_RELATED' && args.length > 0) {
-      queryKeys = INVALIDATION_PATTERNS.AREA_RELATED(args[0] as string);
-    } else if (typeof patternFunction === 'function') {
-      queryKeys = patternFunction();
+      const areaKeys = INVALIDATION_PATTERNS.AREA_RELATED(args[0] as string);
+      queryKeys = areaKeys.map(key => Array.from(key));
     } else {
-      queryKeys = [];
+      const patternFunction = INVALIDATION_PATTERNS[pattern];
+      if (typeof patternFunction === 'function') {
+        const keys = patternFunction();
+        queryKeys = keys.map(key => Array.from(key));
+      }
     }
     
     queryKeys.forEach(queryKey => {
