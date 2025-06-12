@@ -472,6 +472,7 @@ export type Database = {
           descricao_atividade: string | null
           horas_gastas: number
           id: string
+          ordem_producao_id: string | null
           projeto_id: string
           responsavel_id: string
           tipo_atividade: string | null
@@ -483,6 +484,7 @@ export type Database = {
           descricao_atividade?: string | null
           horas_gastas: number
           id?: string
+          ordem_producao_id?: string | null
           projeto_id: string
           responsavel_id: string
           tipo_atividade?: string | null
@@ -494,6 +496,7 @@ export type Database = {
           descricao_atividade?: string | null
           horas_gastas?: number
           id?: string
+          ordem_producao_id?: string | null
           projeto_id?: string
           responsavel_id?: string
           tipo_atividade?: string | null
@@ -504,6 +507,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas_produtivas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_atividades_ordem_producao_id_fkey"
+            columns: ["ordem_producao_id"]
+            isOneToOne: false
+            referencedRelation: "ordem_producao"
             referencedColumns: ["id"]
           },
           {
@@ -575,7 +585,76 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      buscar_ops_dashboard: {
+        Args: {
+          filtro_projeto_id?: string
+          filtro_area_id?: string
+          filtro_status?: string
+          filtro_data_inicio_de?: string
+          filtro_data_inicio_ate?: string
+          limite?: number
+          offset_valor?: number
+        }
+        Returns: {
+          id: string
+          numero_op: string
+          descricao_op: string
+          status_op: string
+          data_inicio_prevista: string
+          data_fim_prevista: string
+          data_inicio_real: string
+          data_fim_real: string
+          projeto_id: string
+          area_responsavel_id: string
+          nome_projeto: string
+          nome_area: string
+          custo_hora_padrao: number
+          tempo_execucao_dias: number
+          custo_total: number
+        }[]
+      }
+      calcular_custos_areas: {
+        Args: {
+          filtro_area_id?: string
+          filtro_data_inicio?: string
+          filtro_data_fim?: string
+        }
+        Returns: {
+          nome_area: string
+          custo_total: number
+        }[]
+      }
+      calcular_custos_projetos: {
+        Args: {
+          filtro_projeto_id?: string
+          filtro_data_inicio?: string
+          filtro_data_fim?: string
+        }
+        Returns: {
+          nome_projeto: string
+          custo_total: number
+        }[]
+      }
       calcular_previsao_custos: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      calcular_rentabilidade_projetos: {
+        Args: {
+          filtro_projeto_id?: string
+          filtro_data_inicio?: string
+          filtro_data_fim?: string
+        }
+        Returns: {
+          projeto_id: string
+          nome_projeto: string
+          receita_total: number
+          custo_total: number
+          lucro: number
+          margem_lucro: number
+        }[]
+      }
+      check_existing_op_alerts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
