@@ -454,6 +454,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      atualizar_previsoes_custos: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      calcular_previsao_custos: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_pending_activity_alerts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
