@@ -39,7 +39,7 @@ export const useGlobalState = () => {
   }, [queryClient]);
 
   // Função para invalidação seletiva
-  const invalidateQueries = useCallback((pattern: keyof typeof INVALIDATION_PATTERNS, ...args: any[]) => {
+  const invalidateQueries = useCallback((pattern: keyof typeof INVALIDATION_PATTERNS, ...args: readonly unknown[]) => {
     const queryKeys = INVALIDATION_PATTERNS[pattern](...args);
     
     queryKeys.forEach(queryKey => {
@@ -93,7 +93,7 @@ export const useGlobalState = () => {
     
     return {
       totalQueries: queries.length,
-      staleQueries: queries.filter(q => q.state.status === 'stale').length,
+      staleQueries: queries.filter(q => q.isStale()).length,
       loadingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
       errorQueries: queries.filter(q => q.state.status === 'error').length,
     };
