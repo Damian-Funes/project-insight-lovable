@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Activities from "./pages/Activities";
 import Projects from "./pages/Projects";
 import Areas from "./pages/Areas";
+import AreaManagement from "./pages/AreaManagement";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const App = () => (
                 <Route path="/activities" element={<Activities />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/areas" element={<Areas />} />
+                <Route path="/area-management" element={<AreaManagement />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

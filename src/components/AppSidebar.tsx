@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp } from "lucide-react";
+import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings } from "lucide-react";
 
 const menuItems = [
   {
@@ -35,6 +35,11 @@ const menuItems = [
     title: "Áreas Produtivas",
     url: "/areas",
     icon: Users,
+  },
+  {
+    title: "Gestão de Áreas",
+    url: "/area-management",
+    icon: Settings,
   },
   {
     title: "Relatórios",
