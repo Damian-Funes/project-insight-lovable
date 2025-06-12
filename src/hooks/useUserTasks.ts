@@ -55,6 +55,9 @@ export const useUserTasks = () => {
           data_fim_real,
           projetos!inner (
             nome_projeto
+          ),
+          areas_produtivas!inner (
+            nome_area
           )
         `)
         .eq("area_responsavel_id", profile.area_id)

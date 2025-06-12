@@ -589,6 +589,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      check_existing_op_alerts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_pending_activity_alerts: {
         Args: Record<PropertyKey, never>
         Returns: undefined

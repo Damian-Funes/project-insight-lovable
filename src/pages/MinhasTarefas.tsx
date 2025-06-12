@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Play, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Play, CheckCircle, Clock, AlertTriangle, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,21 +18,74 @@ const statusColors = {
   'Cancelada': 'bg-red-100 text-red-800',
 };
 
+const urgencyColors = {
+  'critical': 'border-red-500 bg-red-50',
+  'high': 'border-orange-500 bg-orange-50',
+  'medium': 'border-yellow-500 bg-yellow-50',
+  'normal': 'border-gray-200 bg-white',
+};
+
 export default function MinhasTarefas() {
   const { data: tasks, isLoading, error } = useUserTasks();
   const { iniciarOP, concluirOP, isLoading: isUpdating } = useTaskMutations();
 
-  const getDateStatus = (dataInicio: string) => {
+  const getDateStatus = (dataInicio: string, areaName: string, status: string) => {
     const hoje = new Date();
     const dataInicioDate = new Date(dataInicio);
     const diffDays = Math.ceil((dataInicioDate.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
 
-    if (diffDays < 0) {
-      return { icon: AlertTriangle, color: "text-red-600", label: "Atrasada" };
-    } else if (diffDays === 0) {
-      return { icon: Clock, color: "text-orange-600", label: "Hoje" };
+    // Determinar urgência baseada no lead time da área
+    let leadTime = 0;
+    if (areaName?.toLowerCase().includes('almoxarifado') && areaName?.toLowerCase().includes('componentes')) {
+      leadTime = 3;
+    } else if (areaName?.toLowerCase().includes('almoxarifado') && areaName?.toLowerCase().includes('pintadas')) {
+      leadTime = 2;
     } else {
-      return { icon: Clock, color: "text-blue-600", label: `${diffDays} dias` };
+      leadTime = 0; // Produção/Montagem
+    }
+
+    // Determinar urgência
+    let urgency = 'normal';
+    if (status === 'Pendente' && diffDays < 0) {
+      urgency = 'critical'; // Atrasada
+    } else if (status === 'Pendente' && diffDays === 0) {
+      urgency = 'critical'; // Hoje
+    } else if (status === 'Pendente' && diffDays <= leadTime && diffDays > 0) {
+      urgency = diffDays === 1 ? 'high' : 'medium'; // Dentro do lead time
+    }
+
+    if (diffDays < 0) {
+      return { 
+        icon: AlertTriangle, 
+        color: "text-red-600", 
+        label: "Atrasada",
+        urgency,
+        bgColor: "bg-red-100"
+      };
+    } else if (diffDays === 0) {
+      return { 
+        icon: Zap, 
+        color: "text-red-600", 
+        label: "HOJE",
+        urgency,
+        bgColor: "bg-red-100"
+      };
+    } else if (diffDays <= leadTime) {
+      return { 
+        icon: AlertTriangle, 
+        color: "text-orange-600", 
+        label: `${diffDays} dia${diffDays > 1 ? 's' : ''}`,
+        urgency,
+        bgColor: "bg-orange-100"
+      };
+    } else {
+      return { 
+        icon: Clock, 
+        color: "text-blue-600", 
+        label: `${diffDays} dias`,
+        urgency,
+        bgColor: "bg-blue-50"
+      };
     }
   };
 
@@ -75,11 +128,15 @@ export default function MinhasTarefas() {
       ) : (
         <div className="grid gap-4">
           {tasks.map((task) => {
-            const dateStatus = getDateStatus(task.data_inicio_prevista);
+            const areaName = task.areas_produtivas?.nome_area || '';
+            const dateStatus = getDateStatus(task.data_inicio_prevista, areaName, task.status_op);
             const DateIcon = dateStatus.icon;
 
             return (
-              <Card key={task.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={task.id} 
+                className={`hover:shadow-md transition-all duration-200 border-l-4 ${urgencyColors[dateStatus.urgency]}`}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -89,8 +146,18 @@ export default function MinhasTarefas() {
                       >
                         {task.status_op}
                       </Badge>
+                      {dateStatus.urgency === 'critical' && (
+                        <Badge variant="destructive" className="animate-pulse">
+                          URGENTE
+                        </Badge>
+                      )}
+                      {dateStatus.urgency === 'high' && (
+                        <Badge variant="outline" className="border-orange-500 text-orange-700">
+                          ALTA PRIORIDADE
+                        </Badge>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${dateStatus.bgColor}`}>
                       <DateIcon className={`w-4 h-4 ${dateStatus.color}`} />
                       <span className={`text-sm font-medium ${dateStatus.color}`}>
                         {dateStatus.label}
@@ -105,10 +172,14 @@ export default function MinhasTarefas() {
                       <p className="text-muted-foreground">{task.descricao_op}</p>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <h4 className="font-medium text-foreground mb-1">Projeto</h4>
                         <p className="text-muted-foreground">{task.projetos?.nome_projeto}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground mb-1">Área Responsável</h4>
+                        <p className="text-muted-foreground">{areaName}</p>
                       </div>
                       <div>
                         <h4 className="font-medium text-foreground mb-1">Data Início Prevista</h4>
@@ -127,6 +198,7 @@ export default function MinhasTarefas() {
                           disabled={isUpdating}
                           className="flex items-center gap-2"
                           size="sm"
+                          variant={dateStatus.urgency === 'critical' ? 'default' : 'outline'}
                         >
                           <Play className="w-4 h-4" />
                           Marcar como Iniciada
