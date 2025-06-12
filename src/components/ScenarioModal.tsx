@@ -1,6 +1,4 @@
-
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect, memo, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,20 +6,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
 import { useScenarioMutations } from "@/hooks/useScenarios";
 import { useFinancialProjection } from "@/hooks/useFinancialProjection";
 import { ScenarioResults } from "@/components/ScenarioResults";
+import { useOptimizedForm } from "@/hooks/useOptimizedForm";
+import { BasicScenarioStep, ParametersStep } from "@/components/forms/ScenarioFormSteps";
 
 interface ScenarioModalProps {
   isOpen: boolean;
@@ -38,43 +28,50 @@ interface FormData {
   impacto_retrabalho: number;
 }
 
-export const ScenarioModal = ({ isOpen, onClose, scenario }: ScenarioModalProps) => {
+export const ScenarioModal = memo(({ isOpen, onClose, scenario }: ScenarioModalProps) => {
   const [simulationResults, setSimulationResults] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);
   
   const { createScenario, updateScenario } = useScenarioMutations();
   const { data: baselineData } = useFinancialProjection();
-  
-  const form = useForm<FormData>({
-    defaultValues: {
-      nome_cenario: "",
-      descricao_cenario: "",
-      aumento_receitas: 0,
-      aumento_custos_fixos: 0,
-      aumento_custos_variaveis: 0,
-      impacto_retrabalho: 0,
-    },
-  });
 
-  useEffect(() => {
+  const defaultValues = useMemo(() => {
     if (scenario) {
       const params = scenario.parametros_simulacao || {};
-      form.reset({
+      return {
         nome_cenario: scenario.nome_cenario,
         descricao_cenario: scenario.descricao_cenario || "",
         aumento_receitas: params.aumento_receitas || 0,
         aumento_custos_fixos: params.aumento_custos_fixos || 0,
         aumento_custos_variaveis: params.aumento_custos_variaveis || 0,
         impacto_retrabalho: params.impacto_retrabalho || 0,
-      });
+      };
+    }
+    return {
+      nome_cenario: "",
+      descricao_cenario: "",
+      aumento_receitas: 0,
+      aumento_custos_fixos: 0,
+      aumento_custos_variaveis: 0,
+      impacto_retrabalho: 0,
+    };
+  }, [scenario]);
+  
+  const form = useOptimizedForm<FormData>({
+    defaultValues,
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    if (scenario) {
       setSimulationResults(scenario.resultados_simulacao);
     } else {
-      form.reset();
       setSimulationResults(null);
     }
-  }, [scenario, form]);
+    form.reset(defaultValues);
+  }, [scenario, form, defaultValues]);
 
-  const calculateScenario = (params: FormData) => {
+  const calculateScenario = useCallback((params: FormData) => {
     if (!baselineData?.data) return null;
 
     const scenarioData = baselineData.data.map(item => {
@@ -110,15 +107,15 @@ export const ScenarioModal = ({ isOpen, onClose, scenario }: ScenarioModalProps)
         scenarioProfit: totalScenarioRevenues - totalScenarioCosts,
       }
     };
-  };
+  }, [baselineData]);
 
-  const handleSimulate = () => {
+  const handleSimulate = useCallback(() => {
     setIsSimulating(true);
     const formData = form.getValues();
     const results = calculateScenario(formData);
     setSimulationResults(results);
     setIsSimulating(false);
-  };
+  }, [form, calculateScenario]);
 
   const onSubmit = async (data: FormData) => {
     const parametros_simulacao = {
@@ -158,125 +155,9 @@ export const ScenarioModal = ({ isOpen, onClose, scenario }: ScenarioModalProps)
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="nome_cenario"
-                  rules={{ required: "Nome do cenário é obrigatório" }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do Cenário</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Cenário Otimista 2024" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="descricao_cenario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Descreva os principais aspectos deste cenário..." 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <BasicScenarioStep control={form.control} />
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Parâmetros de Simulação</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="aumento_receitas"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Aumento/Redução de Receitas (%)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="aumento_custos_fixos"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Aumento/Redução de Custos Fixos (%)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="aumento_custos_variaveis"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Aumento/Redução de Custos Variáveis (%)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="impacto_retrabalho"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Impacto em Horas de Retrabalho (%)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+              <ParametersStep control={form.control} />
             </div>
 
             <div className="flex justify-center">
@@ -310,4 +191,6 @@ export const ScenarioModal = ({ isOpen, onClose, scenario }: ScenarioModalProps)
       </DialogContent>
     </Dialog>
   );
-};
+});
+
+ScenarioModal.displayName = "ScenarioModal";

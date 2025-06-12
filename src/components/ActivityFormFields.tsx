@@ -1,6 +1,6 @@
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { OptimizedInput } from "@/components/forms/OptimizedInput";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -11,6 +11,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Control } from "react-hook-form";
 import { z } from "zod";
+import { memo } from "react";
 
 const activityFormSchema = z.object({
   data_registro: z.date({
@@ -31,7 +32,7 @@ interface ActivityFormFieldsProps {
   ordensProducao: any[];
 }
 
-export const ActivityFormFields = ({ control, projects, areas, ordensProducao }: ActivityFormFieldsProps) => {
+export const ActivityFormFields = memo(({ control, projects, areas, ordensProducao }: ActivityFormFieldsProps) => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -84,11 +85,12 @@ export const ActivityFormFields = ({ control, projects, areas, ordensProducao }:
             <FormItem>
               <FormLabel>Horas Gastas *</FormLabel>
               <FormControl>
-                <Input
+                <OptimizedInput
                   type="number"
                   step="0.5"
                   min="0"
                   placeholder="Ex: 4.5"
+                  debounceMs={300}
                   {...field}
                 />
               </FormControl>
@@ -219,4 +221,6 @@ export const ActivityFormFields = ({ control, projects, areas, ordensProducao }:
       />
     </>
   );
-};
+});
+
+ActivityFormFields.displayName = "ActivityFormFields";
