@@ -13,6 +13,7 @@ import { ProjectsPagination } from "@/components/ProjectsPagination";
 import { OptimizedProjectsTable } from "@/components/OptimizedProjectsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { ProjectFormData } from "@/components/ProjectFormModal";
 
 const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +39,7 @@ const Projects = () => {
   const totalCount = data?.totalCount || 0;
   const totalPages = data?.totalPages || 1;
 
-  const { deleteProject } = useProjectMutations();
+  const { createProject, updateProject, deleteProject } = useProjectMutations();
 
   // Memoizar estatísticas dos projetos
   const projectStats = useMemo(() => {
@@ -77,6 +78,19 @@ const Projects = () => {
     setIsModalOpen(false);
   }, []);
 
+  const handleFormSubmit = useCallback(async (data: ProjectFormData) => {
+    try {
+      if (modalMode === "create") {
+        await createProject.mutateAsync(data);
+      } else if (selectedProject) {
+        await updateProject.mutateAsync({ id: selectedProject.id, data });
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao salvar projeto:", error);
+    }
+  }, [modalMode, selectedProject, createProject, updateProject]);
+
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
@@ -86,6 +100,21 @@ const Projects = () => {
     setStatus("");
     setCurrentPage(1);
   }, []);
+
+  // Preparar dados iniciais do form
+  const formInitialData = useMemo(() => {
+    if (modalMode === "edit" && selectedProject) {
+      return {
+        nome_projeto: selectedProject.nome_projeto,
+        descricao_projeto: selectedProject.descricao_projeto || "",
+        status_projeto: selectedProject.status_projeto,
+        data_inicio: selectedProject.data_inicio ? new Date(selectedProject.data_inicio) : undefined,
+        data_termino_prevista: selectedProject.data_termino_prevista ? new Date(selectedProject.data_termino_prevista) : undefined,
+        orcamento_total: selectedProject.orcamento_total || 0,
+      };
+    }
+    return undefined;
+  }, [modalMode, selectedProject]);
 
   if (isLoading) {
     return (
@@ -229,10 +258,11 @@ const Projects = () => {
       </Card>
 
       <ProjectFormModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        project={selectedProject}
-        mode={modalMode}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleFormSubmit}
+        initialData={formInitialData}
+        isLoading={createProject.isPending || updateProject.isPending}
       />
     </div>
   );
