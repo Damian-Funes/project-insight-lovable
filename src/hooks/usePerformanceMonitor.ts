@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -80,8 +79,8 @@ class PerformanceLogger {
   }
 
   private logNavigationMetrics(entry: PerformanceNavigationTiming) {
-    const loadTime = entry.loadEventEnd - entry.navigationStart;
-    const domContentLoadedTime = entry.domContentLoadedEventEnd - entry.navigationStart;
+    const loadTime = entry.loadEventEnd - entry.startTime;
+    const domContentLoadedTime = entry.domContentLoadedEventEnd - entry.startTime;
     
     console.log('📊 Métricas de Navegação:', {
       loadTime: `${loadTime}ms`,
