@@ -5,7 +5,7 @@ import {
   Routes,
 } from "react-router-dom";
 import Auth from "@/pages/Auth";
-import { Index } from "@/pages/Index";
+import Index from "@/pages/Index";
 import Projects from "@/pages/Projects";
 import Areas from "@/pages/Areas";
 import Activities from "@/pages/Activities";
