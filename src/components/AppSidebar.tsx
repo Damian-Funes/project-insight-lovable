@@ -13,7 +13,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign } from "lucide-react";
+import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
@@ -55,6 +57,11 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -93,15 +100,32 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center space-x-3 px-4 py-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-chart-secondary to-chart-tertiary rounded-full flex items-center justify-center">
-            <span className="text-xs font-bold text-white">U</span>
+        {user && (
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 px-4 py-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-chart-secondary to-chart-tertiary rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-white">
+                  {user.email?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {user.email}
+                </p>
+                <p className="text-xs text-sidebar-foreground/60">Líder de Área</p>
+              </div>
+            </div>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
           </div>
-          <div>
-            <p className="text-sm font-medium text-sidebar-foreground">Usuário</p>
-            <p className="text-xs text-sidebar-foreground/60">Admin</p>
-          </div>
-        </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

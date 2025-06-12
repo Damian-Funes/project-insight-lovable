@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import Activities from "./pages/Activities";
@@ -13,6 +15,7 @@ import Areas from "./pages/Areas";
 import AreaManagement from "./pages/AreaManagement";
 import Reports from "./pages/Reports";
 import CostDashboard from "./pages/CostDashboard";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,25 +25,37 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <SidebarProvider>
-          <div className="min-h-screen flex w-full bg-background">
-            <AppSidebar />
-            <main className="flex-1 overflow-auto">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/activities" element={<Activities />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/areas" element={<Areas />} />
-                <Route path="/area-management" element={<AreaManagement />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/cost-dashboard" element={<CostDashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </SidebarProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full bg-background">
+                      <AppSidebar />
+                      <main className="flex-1 overflow-auto">
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/activities" element={<Activities />} />
+                          <Route path="/projects" element={<Projects />} />
+                          <Route path="/areas" element={<Areas />} />
+                          <Route path="/area-management" element={<AreaManagement />} />
+                          <Route path="/reports" element={<Reports />} />
+                          <Route path="/cost-dashboard" element={<CostDashboard />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
