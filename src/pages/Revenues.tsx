@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit, Trash2, DollarSign } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useRevenues } from "@/hooks/useRevenues";
 import { useDeleteRevenue } from "@/hooks/useRevenueMutations";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
@@ -62,13 +63,16 @@ export default function Revenues() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Receitas</h1>
-          <p className="text-muted-foreground">
-            Gerencie as receitas dos seus projetos
-          </p>
+    <div className="flex-1 space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <SidebarTrigger />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Receitas</h1>
+            <p className="text-muted-foreground">
+              Gerencie as receitas dos seus projetos
+            </p>
+          </div>
         </div>
         <Button onClick={handleNewRevenue} className="bg-gradient-to-r from-chart-primary to-accent hover:opacity-90">
           <Plus className="mr-2 h-4 w-4" />
