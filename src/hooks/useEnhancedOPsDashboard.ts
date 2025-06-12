@@ -134,15 +134,17 @@ export const useEnhancedOPsDashboard = (filters: EnhancedOPFilters = {}) => {
         statusDistribution: {} as Record<string, number>
       });
 
-      // Merge chunk stats with total stats
+      // Merge chunk stats with total stats - corrigido para garantir tipos corretos
       totalStats.totalOPs += chunkStats.totalOPs;
       totalStats.completedOPs += chunkStats.completedOPs;
       totalStats.delayedOPs += chunkStats.delayedOPs;
       totalStats.totalCost += chunkStats.totalCost;
       totalStats.averageExecutionDays += chunkStats.averageExecutionDays;
       
+      // Corrigido: garantir que os valores sejam números antes da soma
       Object.entries(chunkStats.statusDistribution).forEach(([status, count]) => {
-        totalStats.statusDistribution[status] = (totalStats.statusDistribution[status] || 0) + count;
+        const currentCount = totalStats.statusDistribution[status] || 0;
+        totalStats.statusDistribution[status] = currentCount + Number(count);
       });
     }
 
