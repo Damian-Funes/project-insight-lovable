@@ -17,6 +17,9 @@ export const useActivities = () => {
           ),
           areas_produtivas (
             nome_area
+          ),
+          ordem_producao (
+            numero_op
           )
         `)
         .order("data_registro", { ascending: false });

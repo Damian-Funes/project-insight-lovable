@@ -472,6 +472,7 @@ export type Database = {
           descricao_atividade: string | null
           horas_gastas: number
           id: string
+          ordem_producao_id: string | null
           projeto_id: string
           responsavel_id: string
           tipo_atividade: string | null
@@ -483,6 +484,7 @@ export type Database = {
           descricao_atividade?: string | null
           horas_gastas: number
           id?: string
+          ordem_producao_id?: string | null
           projeto_id: string
           responsavel_id: string
           tipo_atividade?: string | null
@@ -494,6 +496,7 @@ export type Database = {
           descricao_atividade?: string | null
           horas_gastas?: number
           id?: string
+          ordem_producao_id?: string | null
           projeto_id?: string
           responsavel_id?: string
           tipo_atividade?: string | null
@@ -504,6 +507,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas_produtivas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_atividades_ordem_producao_id_fkey"
+            columns: ["ordem_producao_id"]
+            isOneToOne: false
+            referencedRelation: "ordem_producao"
             referencedColumns: ["id"]
           },
           {

@@ -7,6 +7,7 @@ import { Form } from "@/components/ui/form";
 import { useCreateActivity, useUpdateActivity, type ActivityFormData } from "@/hooks/useActivityMutations";
 import { useProjects } from "@/hooks/useProjects";
 import { useAreas } from "@/hooks/useAreas";
+import { useOrdemProducao } from "@/hooks/useOrdemProducao";
 import { useToast } from "@/hooks/use-toast";
 import { ActivityFormFields } from "./ActivityFormFields";
 import { ActivityFormButtons } from "./ActivityFormButtons";
@@ -20,6 +21,7 @@ const activityFormSchema = z.object({
   horas_gastas: z.coerce.number().min(0.1, "Horas gastas deve ser maior que 0"),
   descricao_atividade: z.string().optional(),
   tipo_atividade: z.enum(["Padrão", "Retrabalho"]),
+  ordem_producao_id: z.string().optional(),
 });
 
 interface ActivityFormModalProps {
@@ -34,6 +36,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
   const updateMutation = useUpdateActivity();
   const { data: projects = [] } = useProjects();
   const { data: areas = [] } = useAreas();
+  const { ordensProducao = [] } = useOrdemProducao();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof activityFormSchema>>({
@@ -45,6 +48,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
       horas_gastas: activity?.horas_gastas || 0,
       descricao_atividade: activity?.descricao_atividade || "",
       tipo_atividade: activity?.tipo_atividade || "Padrão",
+      ordem_producao_id: activity?.ordem_producao_id || "",
     },
   });
 
@@ -95,6 +99,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
         descricao_atividade: values.descricao_atividade,
         tipo_atividade: values.tipo_atividade,
         responsavel_id: "00000000-0000-0000-0000-000000000000", // Placeholder - seria o ID do usuário logado
+        ordem_producao_id: values.ordem_producao_id || undefined,
       };
 
       if (mode === "edit" && activity) {
@@ -119,6 +124,7 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
         horas_gastas: 0,
         descricao_atividade: "",
         tipo_atividade: "Padrão",
+        ordem_producao_id: "",
       });
       
       onClose();
@@ -153,7 +159,8 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
             <ActivityFormFields 
               control={form.control} 
               projects={projects} 
-              areas={areas} 
+              areas={areas}
+              ordensProducao={ordensProducao}
             />
             <ActivityFormButtons 
               onCancel={handleClose} 

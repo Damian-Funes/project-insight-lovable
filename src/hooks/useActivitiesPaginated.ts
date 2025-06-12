@@ -54,6 +54,9 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
           ),
           areas_produtivas!inner (
             nome_area
+          ),
+          ordem_producao (
+            numero_op
           )
         `, { count: 'exact' });
 

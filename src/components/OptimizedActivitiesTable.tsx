@@ -15,6 +15,7 @@ interface Activity {
   descricao_atividade?: string;
   projetos?: { nome_projeto: string };
   areas_produtivas?: { nome_area: string };
+  ordem_producao?: { numero_op: string };
 }
 
 interface OptimizedActivitiesTableProps {
@@ -55,6 +56,7 @@ export const OptimizedActivitiesTable = React.memo(({
             <TableHead className="text-muted-foreground">Data</TableHead>
             <TableHead className="text-muted-foreground">Projeto</TableHead>
             <TableHead className="text-muted-foreground">Área</TableHead>
+            <TableHead className="text-muted-foreground">OP</TableHead>
             <TableHead className="text-muted-foreground">Horas</TableHead>
             <TableHead className="text-muted-foreground">Tipo</TableHead>
             <TableHead className="text-muted-foreground">Descrição</TableHead>
@@ -72,6 +74,9 @@ export const OptimizedActivitiesTable = React.memo(({
               </TableCell>
               <TableCell className="text-foreground">
                 {activity.areas_produtivas?.nome_area || "N/A"}
+              </TableCell>
+              <TableCell className="text-foreground">
+                {activity.ordem_producao?.numero_op || "-"}
               </TableCell>
               <TableCell className="text-foreground">{activity.horas_gastas}h</TableCell>
               <TableCell>
