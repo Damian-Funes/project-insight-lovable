@@ -30,17 +30,17 @@ const Activities = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const debouncedProjectId = useDebounce(projectId, 100);
 
-  // Configurar filtros padrão para os últimos 30 dias se não houver filtro de data
+  // Configurar filtros padrão para os últimos 7 dias para melhor performance
   const defaultDateFrom = useMemo(() => {
     if (dateFrom) return dateFrom;
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return thirtyDaysAgo.toISOString().split('T')[0];
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return sevenDaysAgo.toISOString().split('T')[0];
   }, [dateFrom]);
 
-  const { data, isLoading } = useActivitiesPaginated({
+  const { data, isLoading, error } = useActivitiesPaginated({
     page: currentPage,
-    pageSize: 20,
+    pageSize: 15,
     dateFrom: defaultDateFrom,
     dateTo: dateTo || undefined,
     projectId: debouncedProjectId || undefined,
@@ -53,12 +53,12 @@ const Activities = () => {
 
   const deleteMutation = useDeleteActivity();
 
-  // Calcular horas do dia atual (otimizado)
+  // Calcular horas do dia atual (otimizado com memoização)
   const totalHoursToday = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     return activities
       .filter(activity => activity.data_registro === today)
-      .reduce((sum, activity) => sum + Number(activity.horas_gastas), 0);
+      .reduce((sum, activity) => sum + Number(activity.horas_gastas || 0), 0);
   }, [activities]);
 
   const handleNewActivity = useCallback(() => {
@@ -126,6 +126,28 @@ const Activities = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-2">Erro ao carregar atividades</p>
+            <p className="text-sm text-muted-foreground">
+              {error instanceof Error ? error.message : "Erro desconhecido"}
+            </p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4"
+              variant="outline"
+            >
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -167,6 +189,11 @@ const Activities = () => {
           <CardTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-chart-secondary" />
             <span>Atividades Registradas</span>
+            {!dateFrom && (
+              <Badge variant="outline" className="text-xs">
+                Últimos 7 dias
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -201,7 +228,7 @@ const Activities = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 totalCount={totalCount}
-                pageSize={20}
+                pageSize={15}
                 onPageChange={handlePageChange}
               />
             </>

@@ -14,7 +14,7 @@ interface UseActivitiesOptions {
 export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
   const {
     page = 1,
-    pageSize = 20,
+    pageSize = 15, // Reduzido para melhor performance
     dateFrom,
     dateTo,
     projectId,
@@ -29,27 +29,37 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
       let query = supabase
         .from("registros_atividades")
         .select(`
-          *,
-          projetos (
+          id,
+          data_registro,
+          horas_gastas,
+          descricao_atividade,
+          tipo_atividade,
+          projetos!inner (
             nome_projeto
           ),
-          areas_produtivas (
+          areas_produtivas!inner (
             nome_area
           )
         `, { count: 'exact' });
 
-      // Aplicar filtros
+      // Aplicar filtros com defaults otimizados
       if (dateFrom) {
         query = query.gte("data_registro", dateFrom);
+      } else {
+        // Por padrão, buscar apenas os últimos 7 dias para melhor performance
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        query = query.gte("data_registro", sevenDaysAgo.toISOString().split('T')[0]);
       }
+      
       if (dateTo) {
         query = query.lte("data_registro", dateTo);
       }
       if (projectId) {
         query = query.eq("projeto_id", projectId);
       }
-      if (searchTerm) {
-        query = query.or(`descricao_atividade.ilike.%${searchTerm}%,projetos.nome_projeto.ilike.%${searchTerm}%`);
+      if (searchTerm && searchTerm.trim() !== '') {
+        query = query.ilike("descricao_atividade", `%${searchTerm}%`);
       }
 
       // Aplicar paginação
@@ -58,7 +68,8 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
       
       const { data, error, count } = await query
         .range(from, to)
-        .order("data_registro", { ascending: false });
+        .order("data_registro", { ascending: false })
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Erro ao buscar atividades:", error);
@@ -74,8 +85,9 @@ export const useActivitiesPaginated = (options: UseActivitiesOptions = {}) => {
         currentPage: page
       };
     },
-    staleTime: 2 * 60 * 1000, // 2 minutos
-    gcTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 1 * 60 * 1000, // 1 minuto para dados mais frescos
+    gcTime: 3 * 60 * 1000, // 3 minutos
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Não refetch automático no mount
   });
 };
