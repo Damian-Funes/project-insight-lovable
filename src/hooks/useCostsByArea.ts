@@ -2,22 +2,44 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useCostsByArea = () => {
+interface CostsByAreaFilters {
+  startDate?: Date;
+  endDate?: Date;
+  areaId?: string;
+}
+
+export const useCostsByArea = (filters?: CostsByAreaFilters) => {
   return useQuery({
-    queryKey: ["costs-by-area"],
+    queryKey: ["costs-by-area", filters],
     queryFn: async () => {
-      console.log("Buscando custos por área...");
+      console.log("Buscando custos por área com filtros:", filters);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from("registros_atividades")
         .select(`
           area_id,
           horas_gastas,
+          data_registro,
           areas_produtivas (
             nome_area,
             custo_hora_padrao
           )
         `);
+
+      // Aplicar filtros de data
+      if (filters?.startDate) {
+        query = query.gte('data_registro', filters.startDate.toISOString().split('T')[0]);
+      }
+      if (filters?.endDate) {
+        query = query.lte('data_registro', filters.endDate.toISOString().split('T')[0]);
+      }
+
+      // Aplicar filtro de área
+      if (filters?.areaId && filters.areaId !== 'all') {
+        query = query.eq('area_id', filters.areaId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Erro ao buscar custos por área:", error);

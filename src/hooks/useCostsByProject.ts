@@ -2,17 +2,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useCostsByProject = () => {
+interface CostsByProjectFilters {
+  startDate?: Date;
+  endDate?: Date;
+  projectId?: string;
+}
+
+export const useCostsByProject = (filters?: CostsByProjectFilters) => {
   return useQuery({
-    queryKey: ["costs-by-project"],
+    queryKey: ["costs-by-project", filters],
     queryFn: async () => {
-      console.log("Buscando custos por projeto...");
+      console.log("Buscando custos por projeto com filtros:", filters);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from("registros_atividades")
         .select(`
           projeto_id,
           horas_gastas,
+          data_registro,
           projetos (
             nome_projeto
           ),
@@ -20,6 +27,21 @@ export const useCostsByProject = () => {
             custo_hora_padrao
           )
         `);
+
+      // Aplicar filtros de data
+      if (filters?.startDate) {
+        query = query.gte('data_registro', filters.startDate.toISOString().split('T')[0]);
+      }
+      if (filters?.endDate) {
+        query = query.lte('data_registro', filters.endDate.toISOString().split('T')[0]);
+      }
+
+      // Aplicar filtro de projeto
+      if (filters?.projectId && filters.projectId !== 'all') {
+        query = query.eq('projeto_id', filters.projectId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Erro ao buscar custos por projeto:", error);
