@@ -53,6 +53,9 @@ const revenueTypes = [
   "Outros",
 ];
 
+// ID de projeto padrão para receitas gerais
+const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000001";
+
 export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { createRevenue, updateRevenue } = useRevenueMutations();
@@ -91,12 +94,16 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
       const revenueData = {
         data_receita: data.data_receita,
         valor_receita: parseFloat(data.valor_receita),
+        projeto_id: DEFAULT_PROJECT_ID, // Usar projeto padrão
         descricao_receita: data.descricao_receita,
         tipo_receita: data.tipo_receita,
       };
 
       if (revenue) {
-        await updateRevenue.mutateAsync({ id: revenue.id, ...revenueData });
+        await updateRevenue.mutateAsync({ 
+          id: revenue.id, 
+          ...revenueData 
+        });
       } else {
         await createRevenue.mutateAsync(revenueData);
       }
