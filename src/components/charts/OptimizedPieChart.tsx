@@ -16,7 +16,7 @@ interface OptimizedPieChartProps {
   maxDataPoints?: number;
 }
 
-export const OptimizedPieChart = ({
+export const OptimizedPieChart = React.memo(({
   data,
   dataKey,
   nameKey,
@@ -55,6 +55,7 @@ export const OptimizedPieChart = ({
             paddingAngle={5}
             dataKey={dataKey}
             animationDuration={chartConfig.animationDuration}
+            isAnimationActive={false} // Desabilitar animação para melhor performance
           >
             {optimizedData.map((entry, index) => (
               <Cell 
@@ -96,4 +97,6 @@ export const OptimizedPieChart = ({
       )}
     </div>
   );
-};
+});
+
+OptimizedPieChart.displayName = 'OptimizedPieChart';

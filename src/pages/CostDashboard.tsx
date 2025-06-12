@@ -1,4 +1,3 @@
-
 import React, { useState, lazy, Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { DashboardKPIs } from "@/components/dashboard/DashboardKPIs";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { OptimizedLoadingSpinner } from "@/components/OptimizedLoadingSpinner";
 
-// Lazy loading dos componentes pesados
+// Lazy loading otimizado - apenas para componentes grandes
 const CostChart = lazy(() => import("@/components/CostChart").then(module => ({ default: module.CostChart })));
 const AreaCostChart = lazy(() => import("@/components/AreaCostChart").then(module => ({ default: module.AreaCostChart })));
 const ProfitabilityChart = lazy(() => import("@/components/ProfitabilityChart").then(module => ({ default: module.ProfitabilityChart })));
@@ -26,11 +25,11 @@ const CostDashboard = () => {
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedArea, setSelectedArea] = useState<string>("all");
 
-  // Debounce filtros para melhor performance
-  const debouncedStartDate = useDebounce(startDate, 300);
-  const debouncedEndDate = useDebounce(endDate, 300);
-  const debouncedSelectedProject = useDebounce(selectedProject, 300);
-  const debouncedSelectedArea = useDebounce(selectedArea, 300);
+  // Debounce reduzido para melhor responsividade
+  const debouncedStartDate = useDebounce(startDate, 100);
+  const debouncedEndDate = useDebounce(endDate, 100);
+  const debouncedSelectedProject = useDebounce(selectedProject, 100);
+  const debouncedSelectedArea = useDebounce(selectedArea, 100);
 
   const projectFilters = {
     startDate: debouncedStartDate,

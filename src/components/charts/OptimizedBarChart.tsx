@@ -19,12 +19,12 @@ interface OptimizedBarChartProps {
   maxDataPoints?: number;
 }
 
-export const OptimizedBarChart = ({
+export const OptimizedBarChart = React.memo(({
   data,
   bars,
   xAxisKey,
   title,
-  maxDataPoints = 30 // Menos pontos para gráficos de barra
+  maxDataPoints = 30
 }: OptimizedBarChartProps) => {
   const isMobile = useIsMobile();
   const { optimizedData, chartConfig, isLoading } = useOptimizedCharts({
@@ -74,6 +74,7 @@ export const OptimizedBarChart = ({
               radius={[4, 4, 0, 0]}
               animationDuration={chartConfig.animationDuration}
               name={bar.name || bar.dataKey}
+              isAnimationActive={false} // Desabilitar animação para melhor performance
             />
           ))}
         </BarChart>
@@ -85,4 +86,6 @@ export const OptimizedBarChart = ({
       )}
     </div>
   );
-};
+});
+
+OptimizedBarChart.displayName = 'OptimizedBarChart';

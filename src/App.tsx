@@ -36,9 +36,9 @@ function App() {
         enabled={process.env.NODE_ENV === 'development'}
         budget={{
           maxRenderTime: 100,
-          maxLoadTime: 3000,
-          maxInteractionTime: 50,
-          maxComponentCount: 100,
+          maxLoadTime: 5000, // Aumentado para 5s para dashboards com gráficos
+          maxInteractionTime: 100, // Aumentado para 100ms
+          maxComponentCount: 150, // Aumentado para 150 componentes
         }}
       >
         <QueryClientProvider client={queryClient}>

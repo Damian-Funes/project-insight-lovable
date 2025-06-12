@@ -16,7 +16,7 @@ interface OptimizedAreaChartProps {
   maxDataPoints?: number;
 }
 
-export const OptimizedAreaChart = ({
+export const OptimizedAreaChart = React.memo(({
   data,
   dataKey,
   xAxisKey,
@@ -76,6 +76,7 @@ export const OptimizedAreaChart = ({
             fill={`url(#color-${dataKey})`} 
             strokeWidth={chartConfig.strokeWidth}
             animationDuration={chartConfig.animationDuration}
+            isAnimationActive={false} // Desabilitar animação para melhor performance
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -86,4 +87,6 @@ export const OptimizedAreaChart = ({
       )}
     </div>
   );
-};
+});
+
+OptimizedAreaChart.displayName = 'OptimizedAreaChart';
