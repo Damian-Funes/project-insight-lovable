@@ -33,9 +33,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const checkPendingAlerts = async (userId: string) => {
+  // Função não-bloqueante para verificar alertas pendentes
+  const checkPendingAlertsAsync = async (userId: string) => {
     try {
-      console.log('Verificando alertas pendentes para o usuário:', userId);
+      console.log('Verificando alertas pendentes em background para:', userId);
       const { error } = await supabase.rpc('check_pending_alerts_on_login', {
         user_id: userId
       });
@@ -51,32 +52,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-      
-      // Se usuário está logado, verificar alertas pendentes
-      if (session?.user) {
-        checkPendingAlerts(session.user.id);
-      }
-    });
+    let isMounted = true;
 
-    // Listen for auth changes
+    // Configurar listener primeiro
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      console.log('Auth state changed:', event, !!session);
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Se usuário fez login, verificar alertas pendentes
+      // Verificar alertas pendentes em background (não-bloqueante)
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('Usuário fez login, verificando alertas pendentes...');
-        await checkPendingAlerts(session.user.id);
+        setTimeout(() => {
+          checkPendingAlertsAsync(session.user.id);
+        }, 100);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Verificar sessão inicial com timeout
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+
+        if (error) {
+          console.error('Erro ao obter sessão:', error);
+        }
+
+        setUser(session?.user ?? null);
+        
+        // Se há usuário logado, verificar alertas em background
+        if (session?.user) {
+          setTimeout(() => {
+            checkPendingAlertsAsync(session.user.id);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Erro na inicialização da auth:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Timeout de segurança para evitar carregamento infinito
+    const timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('Timeout na autenticação - definindo loading como false');
+        setLoading(false);
+      }
+    }, 5000);
+
+    initAuth();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

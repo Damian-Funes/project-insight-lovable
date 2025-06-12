@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutos
-      gcTime: 10 * 60 * 1000, // 10 minutos (anteriormente cacheTime)
+      gcTime: 10 * 60 * 1000, // 10 minutos
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
@@ -43,26 +43,18 @@ function App() {
       >
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <ErrorBoundary>
-              <AuthProvider>
-                <ErrorBoundary>
-                  <GlobalStateProvider>
-                    <ErrorBoundary>
-                      <TooltipProvider>
-                        <Suspense fallback={<PageLoadingFallback />}>
-                          <ErrorBoundary>
-                            <AppRoutes />
-                          </ErrorBoundary>
-                        </Suspense>
-                        <Toaster />
-                        <Sonner />
-                        {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
-                      </TooltipProvider>
-                    </ErrorBoundary>
-                  </GlobalStateProvider>
-                </ErrorBoundary>
-              </AuthProvider>
-            </ErrorBoundary>
+            <AuthProvider>
+              <GlobalStateProvider>
+                <TooltipProvider>
+                  <Suspense fallback={<PageLoadingFallback />}>
+                    <AppRoutes />
+                  </Suspense>
+                  <Toaster />
+                  <Sonner />
+                  {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
+                </TooltipProvider>
+              </GlobalStateProvider>
+            </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>
       </PerformanceProvider>

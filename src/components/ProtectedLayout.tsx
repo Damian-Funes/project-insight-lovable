@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -15,29 +15,25 @@ export const ProtectedLayout = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Check for pending alerts when user logs in
+  // Log para debug
   useEffect(() => {
-    if (user) {
-      const checkPendingAlerts = async () => {
-        try {
-          await supabase.rpc('check_pending_alerts_on_login', { user_id: user.id });
-        } catch (error) {
-          console.error('Error checking pending alerts:', error);
-        }
-      };
-      
-      checkPendingAlerts();
-    }
-  }, [user]);
+    console.log('ProtectedLayout - Auth state:', { user: !!user, loading, path: location.pathname });
+  }, [user, loading, location.pathname]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
 
+  // Mostrar loading enquanto verifica autenticação
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner text="Carregando..." />
+      </div>
+    );
   }
 
+  // Redirecionar para auth se não autenticado
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
