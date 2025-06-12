@@ -5,12 +5,15 @@ import { CostChart } from "@/components/CostChart";
 import { CostTable } from "@/components/CostTable";
 import { AreaCostChart } from "@/components/AreaCostChart";
 import { AreaCostTable } from "@/components/AreaCostTable";
+import { ProfitabilityChart } from "@/components/ProfitabilityChart";
+import { ProfitabilityTable } from "@/components/ProfitabilityTable";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { ProjectFilter } from "@/components/ProjectFilter";
 import { AreaFilter } from "@/components/AreaFilter";
 import { useCostsByProject } from "@/hooks/useCostsByProject";
 import { useCostsByArea } from "@/hooks/useCostsByArea";
-import { Loader2, TrendingUp, Building2, Filter, Calendar } from "lucide-react";
+import { useProfitabilityData } from "@/hooks/useProfitabilityData";
+import { Loader2, TrendingUp, Building2, Filter, Calendar, DollarSign, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const CostDashboard = () => {
@@ -31,8 +34,15 @@ const CostDashboard = () => {
     areaId: selectedArea,
   };
 
+  const profitabilityFilters = {
+    startDate,
+    endDate,
+    projectId: selectedProject,
+  };
+
   const { data: costData, isLoading: isLoadingProjects, error: projectError } = useCostsByProject(projectFilters);
   const { data: areaCostData, isLoading: isLoadingAreas, error: areaError } = useCostsByArea(areaFilters);
+  const { data: profitabilityData, isLoading: isLoadingProfitability, error: profitabilityError } = useProfitabilityData(profitabilityFilters);
 
   const clearFilters = () => {
     setStartDate(undefined);
@@ -41,25 +51,27 @@ const CostDashboard = () => {
     setSelectedArea("all");
   };
 
-  if (isLoadingProjects || isLoadingAreas) {
+  if (isLoadingProjects || isLoadingAreas || isLoadingProfitability) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-center h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-chart-primary" />
-          <span className="ml-2 text-muted-foreground">Carregando dados de custos...</span>
+          <span className="ml-2 text-muted-foreground">Carregando dados de custos e rentabilidade...</span>
         </div>
       </div>
     );
   }
 
-  if (projectError || areaError) {
+  if (projectError || areaError || profitabilityError) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
-            <p className="text-destructive mb-2 text-lg font-semibold">Erro ao carregar dados de custos</p>
+            <p className="text-destructive mb-2 text-lg font-semibold">Erro ao carregar dados</p>
             <p className="text-muted-foreground text-sm">
-              {projectError instanceof Error ? projectError.message : areaError instanceof Error ? areaError.message : "Erro desconhecido"}
+              {projectError instanceof Error ? projectError.message : 
+               areaError instanceof Error ? areaError.message :
+               profitabilityError instanceof Error ? profitabilityError.message : "Erro desconhecido"}
             </p>
           </div>
         </div>
@@ -69,6 +81,8 @@ const CostDashboard = () => {
 
   const totalCost = costData?.reduce((sum, project) => sum + project.custo_total, 0) || 0;
   const totalAreaCost = areaCostData?.reduce((sum, area) => sum + area.custo_total, 0) || 0;
+  const totalRevenue = profitabilityData?.reduce((sum, project) => sum + project.receita_total, 0) || 0;
+  const totalProfit = profitabilityData?.reduce((sum, project) => sum + project.lucro, 0) || 0;
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
@@ -77,10 +91,10 @@ const CostDashboard = () => {
         <TrendingUp className="h-8 w-8 text-chart-primary" />
         <div>
           <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-chart-primary to-chart-secondary bg-clip-text text-transparent">
-            Dashboards de Custos
+            Dashboards de Custos & Rentabilidade
           </h2>
           <p className="text-muted-foreground">
-            Análise detalhada dos custos por projeto e área produtiva
+            Análise detalhada dos custos e rentabilidade por projeto e área produtiva
           </p>
         </div>
       </div>
@@ -93,7 +107,7 @@ const CostDashboard = () => {
             <CardTitle className="text-lg">Filtros de Análise</CardTitle>
           </div>
           <CardDescription>
-            Utilize os filtros abaixo para refinar sua análise de custos
+            Utilize os filtros abaixo para refinar sua análise de custos e rentabilidade
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,66 +145,96 @@ const CostDashboard = () => {
         <Card className="border-l-4 border-l-chart-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Custo Total - Projetos
+              Receita Total
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-chart-primary" />
+            <DollarSign className="h-4 w-4 text-chart-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-chart-primary">
-              R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Soma de todos os projetos filtrados
+              Total de receitas dos projetos
             </p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-chart-secondary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Projetos Ativos
+              Custo Total
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-chart-secondary" />
+            <TrendingDown className="h-4 w-4 text-chart-secondary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-secondary">{costData?.length || 0}</div>
+            <div className="text-2xl font-bold text-chart-secondary">
+              R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Total de projetos com atividades
+              Total de custos dos projetos
             </p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-chart-accent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Custo Total - Áreas
+              Lucro Total
             </CardTitle>
-            <Building2 className="h-4 w-4 text-chart-accent" />
+            <TrendingUp className="h-4 w-4 text-chart-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-accent">
-              R$ {totalAreaCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {totalProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Soma de todas as áreas filtradas
+              Receita menos custos
             </p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-chart-highlight">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Áreas Ativas
+              Margem Média
             </CardTitle>
-            <Building2 className="h-4 w-4 text-chart-highlight" />
+            <TrendingUp className="h-4 w-4 text-chart-highlight" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-highlight">{areaCostData?.length || 0}</div>
+            <div className="text-2xl font-bold text-chart-highlight">
+              {totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0.0'}%
+            </div>
             <p className="text-xs text-muted-foreground">
-              Total de áreas com atividades
+              Margem de lucro geral
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Gráficos */}
+      {/* Gráfico de Rentabilidade */}
+      <Card className="border-t-4 border-t-chart-accent">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-chart-accent" />
+            <CardTitle className="text-xl">Rentabilidade por Projeto</CardTitle>
+          </div>
+          <CardDescription>
+            Comparação entre receita, custo e lucro/prejuízo por projeto
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {profitabilityData && profitabilityData.length > 0 ? (
+            <ProfitabilityChart data={profitabilityData} />
+          ) : (
+            <div className="flex items-center justify-center h-[400px] text-muted-foreground">
+              <div className="text-center">
+                <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg">Nenhum dado de rentabilidade disponível</p>
+                <p className="text-sm">Ajuste os filtros ou verifique se há receitas e atividades registradas</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Gráficos de Custo */}
       <div className="grid gap-6 lg:grid-cols-1">
         <Card className="border-t-4 border-t-chart-primary">
           <CardHeader>
@@ -244,35 +288,54 @@ const CostDashboard = () => {
       </div>
 
       {/* Tabelas */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
+        {/* Tabela de Rentabilidade */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-chart-primary" />
-              Detalhamento - Custos por Projeto
+              <DollarSign className="h-5 w-5 text-chart-accent" />
+              Detalhamento - Rentabilidade por Projeto
             </CardTitle>
             <CardDescription>
-              Valores detalhados dos custos calculados por projeto
+              Valores detalhados de receita, custo, lucro e margem de lucro por projeto
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CostTable data={costData || []} />
+            <ProfitabilityTable data={profitabilityData || []} />
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-chart-secondary" />
-              Detalhamento - Custos por Área
-            </CardTitle>
-            <CardDescription>
-              Valores detalhados dos custos calculados por área produtiva
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AreaCostTable data={areaCostData || []} />
-          </CardContent>
-        </Card>
+
+        {/* Tabelas de Custo */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-chart-primary" />
+                Detalhamento - Custos por Projeto
+              </CardTitle>
+              <CardDescription>
+                Valores detalhados dos custos calculados por projeto
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CostTable data={costData || []} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-chart-secondary" />
+                Detalhamento - Custos por Área
+              </CardTitle>
+              <CardDescription>
+                Valores detalhados dos custos calculados por área produtiva
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AreaCostTable data={areaCostData || []} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
