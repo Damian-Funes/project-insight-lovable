@@ -56,7 +56,12 @@ export const ActivityFormModal = ({ isOpen, onClose, activity, mode }: ActivityF
 
   const onSubmit = async (values: z.infer<typeof activityFormSchema>) => {
     const formData: ActivityFormData = {
-      ...values,
+      data_registro: values.data_registro,
+      projeto_id: values.projeto_id,
+      area_id: values.area_id,
+      horas_gastas: values.horas_gastas,
+      descricao_atividade: values.descricao_atividade,
+      tipo_atividade: values.tipo_atividade,
       responsavel_id: "00000000-0000-0000-0000-000000000000", // Placeholder - seria o ID do usuário logado
     };
 
