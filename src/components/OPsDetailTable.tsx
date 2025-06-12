@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OPWithDetails } from "@/hooks/useOPsDashboard";
+import { OptimizedOPWithDetails } from "@/hooks/useOptimizedOPsDashboard";
 
 interface OPsDetailTableProps {
-  ops: OPWithDetails[];
+  ops: OptimizedOPWithDetails[];
 }
 
 const statusColors = {

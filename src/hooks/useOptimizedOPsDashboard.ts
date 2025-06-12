@@ -6,7 +6,31 @@ export interface OptimizedOPFilters {
   projeto_id?: string;
   area_id?: string;
   status?: string;
+  data_inicio_de?: string;
+  data_inicio_ate?: string;
   limit?: number;
+}
+
+export interface OptimizedOPWithDetails {
+  id: string;
+  numero_op: string;
+  descricao_op: string;
+  status_op: string;
+  data_inicio_prevista: string;
+  data_fim_prevista: string;
+  data_inicio_real?: string;
+  data_fim_real?: string;
+  projeto_id: string;
+  area_responsavel_id: string;
+  projetos: {
+    nome_projeto: string;
+  };
+  areas_produtivas: {
+    nome_area: string;
+    custo_hora_padrao?: number;
+  };
+  tempo_execucao_dias?: number;
+  custo_total?: number;
 }
 
 export const useOptimizedOPsDashboard = (filters: OptimizedOPFilters = {}) => {
@@ -20,11 +44,14 @@ export const useOptimizedOPsDashboard = (filters: OptimizedOPFilters = {}) => {
         .select(`
           id,
           numero_op,
+          descricao_op,
           status_op,
           data_inicio_prevista,
           data_fim_prevista,
           data_inicio_real,
           data_fim_real,
+          projeto_id,
+          area_responsavel_id,
           projetos!inner(nome_projeto),
           areas_produtivas!inner(nome_area, custo_hora_padrao)
         `);
@@ -42,9 +69,17 @@ export const useOptimizedOPsDashboard = (filters: OptimizedOPFilters = {}) => {
         query = query.eq("status_op", filters.status);
       }
 
+      if (filters.data_inicio_de) {
+        query = query.gte("data_inicio_prevista", filters.data_inicio_de);
+      }
+
+      if (filters.data_inicio_ate) {
+        query = query.lte("data_inicio_prevista", filters.data_inicio_ate);
+      }
+
       const { data: ops, error } = await query
         .order("created_at", { ascending: false })
-        .limit(filters.limit || 50); // Limitar para melhor performance
+        .limit(filters.limit || 50);
 
       if (error) {
         console.error("Erro ao buscar OPs:", error);
@@ -66,7 +101,7 @@ export const useOptimizedOPsDashboard = (filters: OptimizedOPFilters = {}) => {
           ...op,
           tempo_execucao_dias,
           custo_total,
-        };
+        } as OptimizedOPWithDetails;
       });
 
       console.log(`OPs carregadas: ${opsWithCalculations.length}`);
@@ -76,6 +111,6 @@ export const useOptimizedOPsDashboard = (filters: OptimizedOPFilters = {}) => {
     gcTime: 15 * 60 * 1000, // 15 minutos
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    placeholderData: (previousData) => previousData, // Manter dados anteriores durante recarregamento
+    placeholderData: (previousData) => previousData,
   });
 };

@@ -1,25 +1,10 @@
+
 import { useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { useOptimizedRevenues } from "@/hooks/useOptimizedRevenues";
 import { useRevenueMutations } from "@/hooks/useRevenueMutations";
@@ -82,7 +67,6 @@ export default function RevenueManagement() {
         </Button>
       </div>
 
-      {/* Loading com skeleton otimizado */}
       {isLoading ? (
         <RevenueTableSkeleton />
       ) : (
@@ -164,9 +148,7 @@ export default function RevenueManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Excluir
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
