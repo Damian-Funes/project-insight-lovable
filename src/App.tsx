@@ -25,7 +25,6 @@ import AlertsConfiguration from "./pages/AlertsConfiguration";
 import OperationalAlertsManagement from "./pages/OperationalAlertsManagement";
 import OrdemProducaoManagement from "./pages/OrdemProducaoManagement";
 import NotFound from "./pages/NotFound";
-import { VisualIdentityGuard } from "@/components/VisualIdentityGuard";
 
 const queryClient = new QueryClient();
 
@@ -38,28 +37,26 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <SidebarProvider>
-              <VisualIdentityGuard>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
-                  <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-                  <Route path="/areas" element={<ProtectedRoute><Areas /></ProtectedRoute>} />
-                  <Route path="/area-management" element={<ProtectedRoute><AreaManagement /></ProtectedRoute>} />
-                  <Route path="/tv-corporativa" element={<ProtectedRoute><TvCorporativa /></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                  <Route path="/cost-dashboard" element={<ProtectedRoute><CostDashboard /></ProtectedRoute>} />
-                  <Route path="/revenue-management" element={<ProtectedRoute><RevenueManagement /></ProtectedRoute>} />
-                  <Route path="/financial-projection" element={<ProtectedRoute><FinancialProjection /></ProtectedRoute>} />
-                  <Route path="/predictive-models" element={<ProtectedRoute><PredictiveModels /></ProtectedRoute>} />
-                  <Route path="/scenario-analysis" element={<ProtectedRoute><ScenarioAnalysis /></ProtectedRoute>} />
-                  <Route path="/alerts-configuration" element={<ProtectedRoute><AlertsConfiguration /></ProtectedRoute>} />
-                  <Route path="/operational-alerts" element={<ProtectedRoute><OperationalAlertsManagement /></ProtectedRoute>} />
-                  <Route path="/ordem-producao" element={<ProtectedRoute><OrdemProducaoManagement /></ProtectedRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </VisualIdentityGuard>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+                <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+                <Route path="/areas" element={<ProtectedRoute><Areas /></ProtectedRoute>} />
+                <Route path="/area-management" element={<ProtectedRoute><AreaManagement /></ProtectedRoute>} />
+                <Route path="/tv-corporativa" element={<ProtectedRoute><TvCorporativa /></ProtectedRoute>} />
+                <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/cost-dashboard" element={<ProtectedRoute><CostDashboard /></ProtectedRoute>} />
+                <Route path="/revenue-management" element={<ProtectedRoute><RevenueManagement /></ProtectedRoute>} />
+                <Route path="/financial-projection" element={<ProtectedRoute><FinancialProjection /></ProtectedRoute>} />
+                <Route path="/predictive-models" element={<ProtectedRoute><PredictiveModels /></ProtectedRoute>} />
+                <Route path="/scenario-analysis" element={<ProtectedRoute><ScenarioAnalysis /></ProtectedRoute>} />
+                <Route path="/alerts-configuration" element={<ProtectedRoute><AlertsConfiguration /></ProtectedRoute>} />
+                <Route path="/operational-alerts" element={<ProtectedRoute><OperationalAlertsManagement /></ProtectedRoute>} />
+                <Route path="/ordem-producao" element={<ProtectedRoute><OrdemProducaoManagement /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </SidebarProvider>
           </BrowserRouter>
         </TooltipProvider>
