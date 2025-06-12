@@ -18,6 +18,7 @@ import Reports from "./pages/Reports";
 import CostDashboard from "./pages/CostDashboard";
 import RevenueManagement from "./pages/RevenueManagement";
 import FinancialProjection from "./pages/FinancialProjection";
+import ScenarioAnalysis from "./pages/ScenarioAnalysis";
 import AlertsConfiguration from "./pages/AlertsConfiguration";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -52,6 +53,7 @@ const App = () => (
                           <Route path="/cost-dashboard" element={<CostDashboard />} />
                           <Route path="/revenue-management" element={<RevenueManagement />} />
                           <Route path="/financial-projection" element={<FinancialProjection />} />
+                          <Route path="/scenario-analysis" element={<ScenarioAnalysis />} />
                           <Route path="/alerts-configuration" element={<AlertsConfiguration />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
