@@ -32,85 +32,87 @@ const LazyRoute = ({ children }: { children: React.ReactNode }) => (
   </Suspense>
 );
 
-export const AppRoutes = () => (
-  <Routes>
-    {/* Rotas públicas */}
-    <Route path="/" element={<Index />} />
-    <Route path="/auth" element={<Auth />} />
-    
-    {/* Rotas protegidas */}
-    <Route path="/" element={<ProtectedLayout />}>
-      <Route 
-        path="dashboard" 
-        element={<LazyRoute><Dashboard /></LazyRoute>} 
-      />
-      <Route 
-        path="dashboard-ops" 
-        element={<LazyRoute><DashboardOPs /></LazyRoute>} 
-      />
-      <Route 
-        path="activities" 
-        element={<LazyRoute><Activities /></LazyRoute>} 
-      />
-      <Route 
-        path="projects" 
-        element={<LazyRoute><Projects /></LazyRoute>} 
-      />
-      <Route 
-        path="areas" 
-        element={<LazyRoute><Areas /></LazyRoute>} 
-      />
-      <Route 
-        path="area-management" 
-        element={<LazyRoute><AreaManagement /></LazyRoute>} 
-      />
-      <Route 
-        path="minhas-tarefas" 
-        element={<LazyRoute><MinhasTarefas /></LazyRoute>} 
-      />
-      <Route 
-        path="tv-corporativa" 
-        element={<LazyRoute><TvCorporativa /></LazyRoute>} 
-      />
-      <Route 
-        path="reports" 
-        element={<LazyRoute><Reports /></LazyRoute>} 
-      />
-      <Route 
-        path="cost-dashboard" 
-        element={<LazyRoute><CostDashboard /></LazyRoute>} 
-      />
-      <Route 
-        path="revenue-management" 
-        element={<LazyRoute><RevenueManagement /></LazyRoute>} 
-      />
-      <Route 
-        path="financial-projection" 
-        element={<LazyRoute><FinancialProjection /></LazyRoute>} 
-      />
-      <Route 
-        path="predictive-models" 
-        element={<LazyRoute><PredictiveModels /></LazyRoute>} 
-      />
-      <Route 
-        path="scenario-analysis" 
-        element={<LazyRoute><ScenarioAnalysis /></LazyRoute>} 
-      />
-      <Route 
-        path="alerts-configuration" 
-        element={<LazyRoute><AlertsConfiguration /></LazyRoute>} 
-      />
-      <Route 
-        path="operational-alerts" 
-        element={<LazyRoute><OperationalAlertsManagement /></LazyRoute>} 
-      />
-      <Route 
-        path="ordem-producao" 
-        element={<LazyRoute><OrdemProducaoManagement /></LazyRoute>} 
-      />
-    </Route>
-    
-    {/* Rota 404 */}
-    <Route path="*" element={<NotFound />} />
-  </Routes>
-);
+export const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Rotas públicas */}
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      
+      {/* Rotas protegidas */}
+      <Route path="/" element={<ProtectedLayout />}>
+        <Route 
+          path="dashboard" 
+          element={<LazyRoute><Dashboard /></LazyRoute>} 
+        />
+        <Route 
+          path="dashboard-ops" 
+          element={<LazyRoute><DashboardOPs /></LazyRoute>} 
+        />
+        <Route 
+          path="activities" 
+          element={<LazyRoute><Activities /></LazyRoute>} 
+        />
+        <Route 
+          path="projects" 
+          element={<LazyRoute><Projects /></LazyRoute>} 
+        />
+        <Route 
+          path="areas" 
+          element={<LazyRoute><Areas /></LazyRoute>} 
+        />
+        <Route 
+          path="area-management" 
+          element={<LazyRoute><AreaManagement /></LazyRoute>} 
+        />
+        <Route 
+          path="minhas-tarefas" 
+          element={<LazyRoute><MinhasTarefas /></LazyRoute>} 
+        />
+        <Route 
+          path="tv-corporativa" 
+          element={<LazyRoute><TvCorporativa /></LazyRoute>} 
+        />
+        <Route 
+          path="reports" 
+          element={<LazyRoute><Reports /></LazyRoute>} 
+        />
+        <Route 
+          path="cost-dashboard" 
+          element={<LazyRoute><CostDashboard /></LazyRoute>} 
+        />
+        <Route 
+          path="revenue-management" 
+          element={<LazyRoute><RevenueManagement /></LazyRoute>} 
+        />
+        <Route 
+          path="financial-projection" 
+          element={<LazyRoute><FinancialProjection /></LazyRoute>} 
+        />
+        <Route 
+          path="predictive-models" 
+          element={<LazyRoute><PredictiveModels /></LazyRoute>} 
+        />
+        <Route 
+          path="scenario-analysis" 
+          element={<LazyRoute><ScenarioAnalysis /></LazyRoute>} 
+        />
+        <Route 
+          path="alerts-configuration" 
+          element={<LazyRoute><AlertsConfiguration /></LazyRoute>} 
+        />
+        <Route 
+          path="operational-alerts" 
+          element={<LazyRoute><OperationalAlertsManagement /></LazyRoute>} 
+        />
+        <Route 
+          path="ordem-producao" 
+          element={<LazyRoute><OrdemProducaoManagement /></LazyRoute>} 
+        />
+      </Route>
+      
+      {/* Rota 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
