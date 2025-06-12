@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alertas_config: {
+        Row: {
+          ativo: boolean
+          condicao: string
+          created_at: string
+          destinatarios: string
+          id: string
+          mensagem_alerta: string
+          nome_alerta: string
+          tipo_alerta: Database["public"]["Enums"]["tipo_alerta"]
+        }
+        Insert: {
+          ativo?: boolean
+          condicao: string
+          created_at?: string
+          destinatarios: string
+          id?: string
+          mensagem_alerta: string
+          nome_alerta: string
+          tipo_alerta: Database["public"]["Enums"]["tipo_alerta"]
+        }
+        Update: {
+          ativo?: boolean
+          condicao?: string
+          created_at?: string
+          destinatarios?: string
+          id?: string
+          mensagem_alerta?: string
+          nome_alerta?: string
+          tipo_alerta?: Database["public"]["Enums"]["tipo_alerta"]
+        }
+        Relationships: []
+      }
       areas_produtivas: {
         Row: {
           created_at: string
@@ -32,6 +65,47 @@ export type Database = {
           nome_area?: string
         }
         Relationships: []
+      }
+      notificacoes: {
+        Row: {
+          alerta_id: string | null
+          contexto_id: string | null
+          created_at: string
+          data_notificacao: string
+          id: string
+          lida: boolean
+          mensagem: string
+          usuario_id: string
+        }
+        Insert: {
+          alerta_id?: string | null
+          contexto_id?: string | null
+          created_at?: string
+          data_notificacao?: string
+          id?: string
+          lida?: boolean
+          mensagem: string
+          usuario_id: string
+        }
+        Update: {
+          alerta_id?: string | null
+          contexto_id?: string | null
+          created_at?: string
+          data_notificacao?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_alerta_id_fkey"
+            columns: ["alerta_id"]
+            isOneToOne: false
+            referencedRelation: "alertas_config"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -265,6 +339,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      tipo_alerta:
+        | "Orçamento Excedido"
+        | "Prazo Próximo"
+        | "Registro Pendente"
+        | "Outros"
       user_role: "admin" | "lider_area" | "funcionario"
     }
     CompositeTypes: {
@@ -381,6 +460,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      tipo_alerta: [
+        "Orçamento Excedido",
+        "Prazo Próximo",
+        "Registro Pendente",
+        "Outros",
+      ],
       user_role: ["admin", "lider_area", "funcionario"],
     },
   },
