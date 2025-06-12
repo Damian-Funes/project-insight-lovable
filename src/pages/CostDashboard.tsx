@@ -13,6 +13,7 @@ import { AreaFilter } from "@/components/AreaFilter";
 import { useCostsByProject } from "@/hooks/useCostsByProject";
 import { useCostsByArea } from "@/hooks/useCostsByArea";
 import { useProfitabilityData } from "@/hooks/useProfitabilityData";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Loader2, TrendingUp, Building2, Filter, Calendar, DollarSign, TrendingDown, Database, FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,22 +24,28 @@ const CostDashboard = () => {
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedArea, setSelectedArea] = useState<string>("all");
 
+  // Debounce filtros para melhor performance
+  const debouncedStartDate = useDebounce(startDate, 300);
+  const debouncedEndDate = useDebounce(endDate, 300);
+  const debouncedSelectedProject = useDebounce(selectedProject, 300);
+  const debouncedSelectedArea = useDebounce(selectedArea, 300);
+
   const projectFilters = {
-    startDate,
-    endDate,
-    projectId: selectedProject,
+    startDate: debouncedStartDate,
+    endDate: debouncedEndDate,
+    projectId: debouncedSelectedProject,
   };
 
   const areaFilters = {
-    startDate,
-    endDate,
-    areaId: selectedArea,
+    startDate: debouncedStartDate,
+    endDate: debouncedEndDate,
+    areaId: debouncedSelectedArea,
   };
 
   const profitabilityFilters = {
-    startDate,
-    endDate,
-    projectId: selectedProject,
+    startDate: debouncedStartDate,
+    endDate: debouncedEndDate,
+    projectId: debouncedSelectedProject,
   };
 
   const { data: costData = [], isLoading: isLoadingProjects, error: projectError } = useCostsByProject(projectFilters);
@@ -63,7 +70,7 @@ const CostDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex-1 space-y-4">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin text-chart-primary mx-auto mb-4" />
@@ -77,7 +84,7 @@ const CostDashboard = () => {
 
   if (hasError) {
     return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex-1 space-y-4">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center max-w-md">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
@@ -107,7 +114,7 @@ const CostDashboard = () => {
   const totalProfit = profitabilityData?.reduce((sum, project) => sum + project.lucro, 0) || 0;
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="flex-1 space-y-6">
       {/* Header */}
       <div className="flex items-center space-x-2">
         <TrendingUp className="h-8 w-8 text-chart-primary" />
