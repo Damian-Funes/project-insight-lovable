@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,7 @@ import AlertsConfiguration from "./pages/AlertsConfiguration";
 import OperationalAlertsManagement from "./pages/OperationalAlertsManagement";
 import OrdemProducaoManagement from "./pages/OrdemProducaoManagement";
 import NotFound from "./pages/NotFound";
+import MinhasTarefas from "./pages/MinhasTarefas";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +56,7 @@ function App() {
                 <Route path="projects" element={<Projects />} />
                 <Route path="areas" element={<Areas />} />
                 <Route path="area-management" element={<AreaManagement />} />
+                <Route path="minhas-tarefas" element={<MinhasTarefas />} />
                 <Route path="tv-corporativa" element={<TvCorporativa />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="cost-dashboard" element={<CostDashboard />} />
