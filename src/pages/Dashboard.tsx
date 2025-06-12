@@ -2,23 +2,16 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area
-} from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Clock, Users, AlertTriangle } from "lucide-react";
+import { OptimizedAreaChart } from "@/components/charts/OptimizedAreaChart";
+import { OptimizedBarChart } from "@/components/charts/OptimizedBarChart";
+import { ChartSkeleton } from "@/components/charts/ChartSkeleton";
+import { Suspense, lazy } from "react";
+
+// Lazy loading do componente de pizza
+const OptimizedPieChart = lazy(() => 
+  import("@/components/charts/OptimizedPieChart").then(module => ({ default: module.OptimizedPieChart }))
+);
 
 const Dashboard = () => {
   // Mock data for demonstrations
@@ -123,7 +116,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Charts Grid */}
+      {/* Charts Grid - Otimizados com Suspense */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue vs Cost Trend */}
         <Card className="chart-container">
@@ -131,46 +124,15 @@ const Dashboard = () => {
             <CardTitle className="text-foreground">Receita vs Custo (Últimos 6 meses)</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyData}>
-                <defs>
-                  <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorCusto" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                <XAxis dataKey="month" stroke="#94A3B8" />
-                <YAxis stroke="#94A3B8" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(220, 20%, 12%)', 
-                    border: '1px solid hsl(220, 20%, 20%)',
-                    borderRadius: '8px'
-                  }} 
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="receita" 
-                  stroke="#3B82F6" 
-                  fillOpacity={1} 
-                  fill="url(#colorReceita)" 
-                  strokeWidth={2}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="custo" 
-                  stroke="#EF4444" 
-                  fillOpacity={1} 
-                  fill="url(#colorCusto)" 
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton type="area" showTitle={false} />}>
+              <OptimizedAreaChart
+                data={monthlyData}
+                dataKey="receita"
+                xAxisKey="month"
+                color="#3B82F6"
+                maxDataPoints={12}
+              />
+            </Suspense>
           </CardContent>
         </Card>
 
@@ -180,41 +142,14 @@ const Dashboard = () => {
             <CardTitle className="text-foreground">Distribuição de Custos por Projeto</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={projectCosts}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {projectCosts.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(220, 20%, 12%)', 
-                    border: '1px solid hsl(220, 20%, 20%)',
-                    borderRadius: '8px'
-                  }} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              {projectCosts.map((project, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: project.color }}
-                  />
-                  <span className="text-sm text-muted-foreground">{project.name}</span>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<ChartSkeleton type="pie" showTitle={false} />}>
+              <OptimizedPieChart
+                data={projectCosts}
+                dataKey="value"
+                nameKey="name"
+                maxDataPoints={8}
+              />
+            </Suspense>
           </CardContent>
         </Card>
 
@@ -224,22 +159,17 @@ const Dashboard = () => {
             <CardTitle className="text-foreground">Eficiência por Área Produtiva</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={areaEfficiency}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 20%)" />
-                <XAxis dataKey="area" stroke="#94A3B8" />
-                <YAxis stroke="#94A3B8" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(220, 20%, 12%)', 
-                    border: '1px solid hsl(220, 20%, 20%)',
-                    borderRadius: '8px'
-                  }} 
-                />
-                <Bar dataKey="horas" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="custo" fill="#10B981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton type="bar" showTitle={false} />}>
+              <OptimizedBarChart
+                data={areaEfficiency}
+                bars={[
+                  { dataKey: "horas", color: "#8B5CF6", name: "Horas" },
+                  { dataKey: "custo", color: "#10B981", name: "Custo" }
+                ]}
+                xAxisKey="area"
+                maxDataPoints={10}
+              />
+            </Suspense>
           </CardContent>
         </Card>
       </div>
