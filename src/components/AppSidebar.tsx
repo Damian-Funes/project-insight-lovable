@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +12,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt } from "lucide-react";
+import { BarChart3, Clock, FolderOpen, Users, FileText, TrendingUp, Settings, DollarSign, LogOut, Receipt, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -24,9 +23,9 @@ const menuItems = [
     icon: BarChart3,
   },
   {
-    title: "Registro de Atividades",
+    title: "Atividades",
     url: "/activities",
-    icon: Clock,
+    icon: Activity,
   },
   {
     title: "Projetos",
@@ -44,23 +43,28 @@ const menuItems = [
     icon: Settings,
   },
   {
-    title: "Dashboards de Custos",
+    title: "Relatórios",
+    url: "/reports",
+    icon: FileText,
+  },
+  {
+    title: "Dashboard de Custos",
     url: "/cost-dashboard",
     icon: DollarSign,
   },
   {
     title: "Gestão de Receitas",
     url: "/revenue-management",
-    icon: Receipt,
+    icon: TrendingUp,
   },
   {
-    title: "Relatórios",
-    url: "/reports",
-    icon: FileText,
+    title: "Previsão Financeira",
+    url: "/financial-projection",
+    icon: TrendingUp,
   },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const { user, signOut } = useAuth();
 
