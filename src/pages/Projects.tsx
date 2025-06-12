@@ -4,83 +4,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FolderOpen, Plus, DollarSign, Clock, Users, TrendingUp } from "lucide-react";
+import { FolderOpen, Plus, DollarSign, Clock, Users, TrendingUp, Loader2 } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
 
 const Projects = () => {
-  const projects = [
-    {
-      id: 1,
-      name: "Projeto Alpha",
-      description: "Sistema de gestão de vendas e CRM",
-      status: "Em Andamento",
-      budget: 150000,
-      spent: 87500,
-      startDate: "2024-03-15",
-      endDate: "2024-08-30",
-      progress: 58,
-      team: ["Desenvolvimento", "Design", "QA"],
-      hoursWorked: 420,
-      estimatedHours: 720
-    },
-    {
-      id: 2,
-      name: "Projeto Beta",
-      description: "Aplicativo móvel para delivery",
-      status: "Planejamento",
-      budget: 80000,
-      spent: 12000,
-      startDate: "2024-06-01",
-      endDate: "2024-10-15",
-      progress: 15,
-      team: ["Desenvolvimento", "Design"],
-      hoursWorked: 85,
-      estimatedHours: 560
-    },
-    {
-      id: 3,
-      name: "Projeto Gamma",
-      description: "Portal de relatórios executivos",
-      status: "Finalizado",
-      budget: 95000,
-      spent: 92000,
-      startDate: "2024-01-10",
-      endDate: "2024-05-20",
-      progress: 100,
-      team: ["Desenvolvimento", "DevOps"],
-      hoursWorked: 645,
-      estimatedHours: 650
-    },
-    {
-      id: 4,
-      name: "Projeto Delta",
-      description: "Sistema de integração com APIs",
-      status: "Em Andamento",
-      budget: 60000,
-      spent: 35000,
-      startDate: "2024-04-01",
-      endDate: "2024-07-15",
-      progress: 72,
-      team: ["Desenvolvimento", "DevOps", "QA"],
-      hoursWorked: 245,
-      estimatedHours: 340
-    }
-  ];
+  const { data: projects, isLoading, error } = useProjects();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Em Andamento": return "bg-chart-primary/10 text-chart-primary border-chart-primary";
-      case "Planejamento": return "bg-metric-warning/10 text-metric-warning border-metric-warning";
-      case "Finalizado": return "bg-metric-profit/10 text-metric-profit border-metric-profit";
+      case "Ativo": return "bg-chart-primary/10 text-chart-primary border-chart-primary";
+      case "Concluído": return "bg-metric-profit/10 text-metric-profit border-metric-profit";
+      case "Cancelado": return "bg-metric-cost/10 text-metric-cost border-metric-cost";
       default: return "bg-muted/10 text-muted-foreground border-border";
     }
   };
 
-  const getProgressColor = (progress: number) => {
-    if (progress >= 90) return "bg-metric-profit";
-    if (progress >= 70) return "bg-chart-primary";
-    if (progress >= 40) return "bg-metric-warning";
-    return "bg-metric-cost";
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Não definido";
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-chart-primary" />
+          <span className="ml-2 text-muted-foreground">Carregando projetos...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-2">Erro ao carregar projetos</p>
+            <p className="text-sm text-muted-foreground">
+              {error instanceof Error ? error.message : "Erro desconhecido"}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -100,7 +75,7 @@ const Projects = () => {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {projects.map((project) => (
+        {projects?.map((project) => (
           <Card key={project.id} className="metric-card">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -109,12 +84,12 @@ const Projects = () => {
                     <FolderOpen className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-foreground">{project.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{project.description}</p>
+                    <CardTitle className="text-lg text-foreground">{project.nome_projeto}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{project.descricao_projeto || "Sem descrição"}</p>
                   </div>
                 </div>
-                <Badge variant="outline" className={getStatusColor(project.status)}>
-                  {project.status}
+                <Badge variant="outline" className={getStatusColor(project.status_projeto)}>
+                  {project.status_projeto}
                 </Badge>
               </div>
             </CardHeader>
@@ -122,7 +97,7 @@ const Projects = () => {
               {/* Progress Bar */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="text-muted-foreground">Utilização do Orçamento</span>
                   <span className="text-foreground font-medium">{project.progress}%</span>
                 </div>
                 <Progress 
@@ -139,10 +114,10 @@ const Projects = () => {
                     <span className="text-sm text-muted-foreground">Orçamento</span>
                   </div>
                   <p className="text-lg font-bold text-foreground">
-                    R$ {(project.budget / 1000).toFixed(0)}K
+                    {formatCurrency(project.budget)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Gasto: R$ {(project.spent / 1000).toFixed(0)}K ({((project.spent / project.budget) * 100).toFixed(0)}%)
+                    Gasto: {formatCurrency(project.spent)}
                   </p>
                 </div>
 
@@ -152,30 +127,11 @@ const Projects = () => {
                     <span className="text-sm text-muted-foreground">Horas</span>
                   </div>
                   <p className="text-lg font-bold text-foreground">
-                    {project.hoursWorked}h
+                    {project.totalHours.toFixed(1)}h
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    de {project.estimatedHours}h estimadas
+                    registradas
                   </p>
-                </div>
-              </div>
-
-              {/* Team Areas */}
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4 text-chart-secondary" />
-                  <span className="text-sm text-muted-foreground">Áreas Envolvidas</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {project.team.map((area, index) => (
-                    <Badge 
-                      key={index}
-                      variant="secondary"
-                      className="bg-chart-secondary/10 text-chart-secondary border-chart-secondary/20"
-                    >
-                      {area}
-                    </Badge>
-                  ))}
                 </div>
               </div>
 
@@ -184,24 +140,31 @@ const Projects = () => {
                 <div>
                   <span className="block">Início</span>
                   <span className="font-medium text-foreground">
-                    {new Date(project.startDate).toLocaleDateString('pt-BR')}
+                    {formatDate(project.data_inicio)}
                   </span>
                 </div>
                 <div>
                   <span className="block">Prazo</span>
                   <span className="font-medium text-foreground">
-                    {new Date(project.endDate).toLocaleDateString('pt-BR')}
+                    {formatDate(project.data_termino_prevista)}
                   </span>
                 </div>
               </div>
 
               {/* Cost Efficiency Indicator */}
               <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="text-sm text-muted-foreground">Eficiência de Custo</span>
+                <span className="text-sm text-muted-foreground">Status Financeiro</span>
                 <div className="flex items-center space-x-1">
-                  <TrendingUp className="w-4 h-4 text-metric-profit" />
-                  <span className="text-sm font-medium text-metric-profit">
-                    {project.spent <= project.budget * 0.9 ? "Dentro do orçamento" : "Atenção"}
+                  <TrendingUp className={`w-4 h-4 ${
+                    project.progress <= 80 ? "text-metric-profit" : 
+                    project.progress <= 100 ? "text-metric-warning" : "text-metric-cost"
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    project.progress <= 80 ? "text-metric-profit" : 
+                    project.progress <= 100 ? "text-metric-warning" : "text-metric-cost"
+                  }`}>
+                    {project.progress <= 80 ? "Dentro do orçamento" : 
+                     project.progress <= 100 ? "Próximo do limite" : "Excedeu orçamento"}
                   </span>
                 </div>
               </div>
@@ -209,6 +172,20 @@ const Projects = () => {
           </Card>
         ))}
       </div>
+
+      {projects && projects.length === 0 && (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum projeto encontrado</h3>
+            <p className="text-muted-foreground mb-4">Comece criando seu primeiro projeto</p>
+            <Button className="bg-chart-primary hover:bg-chart-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Projeto
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
