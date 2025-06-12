@@ -11,6 +11,10 @@ interface OptimisticMutationConfig<TData, TVariables> extends Omit<MutationOptio
   errorMessage?: string;
 }
 
+interface MutationContext {
+  previousData?: any;
+}
+
 export const useOptimisticMutation = <TData, TVariables>({
   mutationFn,
   queryKey,
@@ -24,7 +28,7 @@ export const useOptimisticMutation = <TData, TVariables>({
 
   return useMutation({
     mutationFn,
-    onMutate: async (variables) => {
+    onMutate: async (variables): Promise<MutationContext> => {
       // Cancela queries em andamento para evitar sobrescrever o update otimista
       await queryClient.cancelQueries({ queryKey });
 
@@ -39,7 +43,7 @@ export const useOptimisticMutation = <TData, TVariables>({
       // Retorna o contexto com os dados anteriores
       return { previousData };
     },
-    onError: (error, variables, context) => {
+    onError: (error, variables, context: MutationContext | undefined) => {
       // Reverte para os dados anteriores em caso de erro
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData);
@@ -54,7 +58,7 @@ export const useOptimisticMutation = <TData, TVariables>({
       // Chama o onError personalizado se fornecido
       options.onError?.(error, variables, context);
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, context: MutationContext | undefined) => {
       toast({
         title: "Sucesso",
         description: successMessage || "Operação realizada com sucesso",
@@ -63,12 +67,12 @@ export const useOptimisticMutation = <TData, TVariables>({
       // Chama o onSuccess personalizado se fornecido
       options.onSuccess?.(data, variables, context);
     },
-    onSettled: () => {
+    onSettled: (data, error, variables, context: MutationContext | undefined) => {
       // Invalida e refetch para sincronizar com o servidor
       queryClient.invalidateQueries({ queryKey });
       
       // Chama o onSettled personalizado se fornecido
-      options.onSettled?.();
+      options.onSettled?.(data, error, variables, context);
     },
     ...options,
   });

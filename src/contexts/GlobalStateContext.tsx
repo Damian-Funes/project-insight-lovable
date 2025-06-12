@@ -8,7 +8,7 @@ interface GlobalStateContextType {
     queryKey: readonly unknown[],
     updater: (oldData: T | undefined) => T
   ) => void;
-  invalidateQueries: (pattern: string, ...args: any[]) => void;
+  invalidateQueries: (queryKeys: (string | number | object)[][]) => void;
   invalidateActivityRelated: (activityData: {
     projeto_id?: string;
     area_id?: string;
@@ -34,8 +34,19 @@ export const GlobalStateProvider = ({ children }: { children: React.ReactNode })
     globalState.prefetchCommonData();
   }, [globalState.prefetchCommonData]);
 
+  const contextValue: GlobalStateContextType = {
+    prefetchCommonData: globalState.prefetchCommonData,
+    updateQueryData: globalState.updateQueryData,
+    invalidateQueries: globalState.invalidateQueries,
+    invalidateActivityRelated: globalState.invalidateActivityRelated,
+    invalidateProjectRelated: globalState.invalidateProjectRelatedQueries,
+    getCachedData: globalState.getCachedData,
+    cleanupCache: globalState.cleanupCache,
+    cacheMetrics: globalState.cacheMetrics,
+  };
+
   return (
-    <GlobalStateContext.Provider value={globalState}>
+    <GlobalStateContext.Provider value={contextValue}>
       {children}
     </GlobalStateContext.Provider>
   );

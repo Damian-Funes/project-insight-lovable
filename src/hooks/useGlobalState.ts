@@ -25,14 +25,14 @@ const INITIAL_STATE: GlobalState = {
 export const useGlobalState = () => {
   const queryClient = useQueryClient();
 
-  const invalidateQueries = useCallback((queryKeys: string[][]) => {
+  const invalidateQueries = useCallback((queryKeys: (string | number | object)[][]) => {
     queryKeys.forEach(queryKey => {
       queryClient.invalidateQueries({ queryKey });
     });
   }, [queryClient]);
 
   const invalidateProjectRelatedQueries = useCallback((projectId?: string) => {
-    const baseQueries = [
+    const baseQueries: (string | number | object)[][] = [
       ["dashboards"],
       ["projects"],
       ["activities"],
@@ -49,7 +49,7 @@ export const useGlobalState = () => {
   }, [invalidateQueries]);
 
   const invalidateAreaRelatedQueries = useCallback((areaId?: string) => {
-    const baseQueries = [
+    const baseQueries: (string | number | object)[][] = [
       ["dashboards"],
       ["areas"],
       ["activities"],
@@ -66,7 +66,7 @@ export const useGlobalState = () => {
   }, [invalidateQueries]);
 
   const refreshAllQueries = useCallback(() => {
-    const allQueries = [
+    const allQueries: (string | number | object)[][] = [
       ["activities", "paginated"],
       ["activities"],
       ["projects"],
@@ -77,9 +77,72 @@ export const useGlobalState = () => {
     invalidateQueries(allQueries);
   }, [invalidateQueries]);
 
+  const prefetchCommonData = useCallback(async () => {
+    try {
+      await Promise.all([
+        queryClient.prefetchQuery({
+          queryKey: ["projects"],
+          staleTime: 5 * 60 * 1000,
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ["areas"],
+          staleTime: 5 * 60 * 1000,
+        }),
+      ]);
+    } catch (error) {
+      console.error("Erro ao fazer prefetch dos dados:", error);
+    }
+  }, [queryClient]);
+
+  const updateQueryData = useCallback(<T>(
+    queryKey: readonly unknown[],
+    updater: (oldData: T | undefined) => T
+  ) => {
+    queryClient.setQueryData(queryKey, updater);
+  }, [queryClient]);
+
+  const invalidateActivityRelated = useCallback((activityData: {
+    projeto_id?: string;
+    area_id?: string;
+  }) => {
+    const queries: (string | number | object)[][] = [["activities"]];
+    
+    if (activityData.projeto_id) {
+      queries.push(["projects", activityData.projeto_id]);
+    }
+    
+    if (activityData.area_id) {
+      queries.push(["areas", activityData.area_id]);
+    }
+    
+    invalidateQueries(queries);
+  }, [invalidateQueries]);
+
+  const getCachedData = useCallback(<T>(queryKey: readonly unknown[]): T | undefined => {
+    return queryClient.getQueryData(queryKey);
+  }, [queryClient]);
+
+  const cleanupCache = useCallback(() => {
+    queryClient.clear();
+  }, [queryClient]);
+
+  const cacheMetrics = {
+    totalQueries: queryClient.getQueryCache().getAll().length,
+    staleQueries: queryClient.getQueryCache().getAll().filter(q => q.isStale()).length,
+    loadingQueries: queryClient.getQueryCache().getAll().filter(q => q.state.fetchStatus === 'fetching').length,
+    errorQueries: queryClient.getQueryCache().getAll().filter(q => q.state.status === 'error').length,
+  };
+
   return {
+    prefetchCommonData,
+    updateQueryData,
+    invalidateQueries,
+    invalidateActivityRelated,
     invalidateProjectRelatedQueries,
     invalidateAreaRelatedQueries,
     refreshAllQueries,
+    getCachedData,
+    cleanupCache,
+    cacheMetrics,
   };
 };

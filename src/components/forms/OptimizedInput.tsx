@@ -3,7 +3,7 @@ import React, { memo, forwardRef, useRef, useImperativeHandle } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-interface OptimizedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface OptimizedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   onChange?: (value: string) => void;
   controlled?: boolean;
   debounceMs?: number;
