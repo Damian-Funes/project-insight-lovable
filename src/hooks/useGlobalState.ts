@@ -93,7 +93,7 @@ export const useGlobalState = () => {
     
     return {
       totalQueries: queries.length,
-      staleQueries: queries.filter(q => q.isStale()).length,
+      staleQueries: queries.filter(q => q.state.status === 'stale').length,
       loadingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
       errorQueries: queries.filter(q => q.state.status === 'error').length,
     };

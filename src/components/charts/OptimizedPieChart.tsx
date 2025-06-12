@@ -1,20 +1,9 @@
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useOptimizedCharts } from '@/hooks/useOptimizedCharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { OptimizedLoadingSpinner } from '@/components/OptimizedLoadingSpinner';
-
-const RechartsComponents = lazy(() => 
-  import('recharts').then(module => ({
-    default: {
-      PieChart: module.PieChart,
-      Pie: module.Pie,
-      Cell: module.Cell,
-      Tooltip: module.Tooltip,
-      ResponsiveContainer: module.ResponsiveContainer,
-    }
-  }))
-);
 
 interface OptimizedPieChartProps {
   data: Array<{
@@ -55,41 +44,35 @@ export const OptimizedPieChart = ({
       {title && (
         <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
       )}
-      <Suspense fallback={<OptimizedLoadingSpinner />}>
-        <RechartsComponents>
-          {({ PieChart, Pie, Cell, Tooltip, ResponsiveContainer }) => (
-            <ResponsiveContainer width="100%" height={chartConfig.height}>
-              <PieChart>
-                <Pie
-                  data={optimizedData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={isMobile ? 40 : 60}
-                  outerRadius={isMobile ? 80 : 120}
-                  paddingAngle={5}
-                  dataKey={dataKey}
-                  animationDuration={chartConfig.animationDuration}
-                >
-                  {optimizedData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color || colors[index % colors.length]} 
-                    />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(220, 20%, 12%)', 
-                    border: '1px solid hsl(220, 20%, 20%)',
-                    borderRadius: '8px',
-                    fontSize: isMobile ? '12px' : '14px'
-                  }} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </RechartsComponents>
-      </Suspense>
+      <ResponsiveContainer width="100%" height={chartConfig.height}>
+        <PieChart>
+          <Pie
+            data={optimizedData}
+            cx="50%"
+            cy="50%"
+            innerRadius={isMobile ? 40 : 60}
+            outerRadius={isMobile ? 80 : 120}
+            paddingAngle={5}
+            dataKey={dataKey}
+            animationDuration={chartConfig.animationDuration}
+          >
+            {optimizedData.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color || colors[index % colors.length]} 
+              />
+            ))}
+          </Pie>
+          <Tooltip 
+            contentStyle={{ 
+              backgroundColor: 'hsl(220, 20%, 12%)', 
+              border: '1px solid hsl(220, 20%, 20%)',
+              borderRadius: '8px',
+              fontSize: isMobile ? '12px' : '14px'
+            }} 
+          />
+        </PieChart>
+      </ResponsiveContainer>
       
       {/* Legenda customizada para mobile */}
       <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'flex-wrap justify-center gap-4'} mt-4`}>
