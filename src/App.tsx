@@ -13,18 +13,19 @@ import { AppRoutes } from "@/components/app/AppRoutes";
 import { PageLoadingFallback } from "@/components/PageLoadingFallback";
 import { PerformanceMonitor } from "@/components/dev/PerformanceMonitor";
 
-// Configuração otimizada do QueryClient
+// Configuração otimizada do QueryClient com cache agressivo
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      gcTime: 10 * 60 * 1000, // 10 minutos
+      staleTime: 15 * 60 * 1000, // 15 minutos (aumentado drasticamente)
+      gcTime: 30 * 60 * 1000, // 30 minutos
       retry: 1,
       refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
+      refetchOnReconnect: false, // Desabilitado para evitar requests desnecessários
+      refetchOnMount: false, // Usar cache primeiro
     },
     mutations: {
-      retry: 1,
+      retry: 0, // Sem retry para mutations para performance
     },
   },
 });
@@ -35,10 +36,10 @@ function App() {
       <PerformanceProvider 
         enabled={process.env.NODE_ENV === 'development'}
         budget={{
-          maxRenderTime: 100,
-          maxLoadTime: 5000, // Aumentado para 5s para dashboards com gráficos
-          maxInteractionTime: 100, // Aumentado para 100ms
-          maxComponentCount: 150, // Aumentado para 150 componentes
+          maxRenderTime: 50, // Reduzido para 50ms
+          maxLoadTime: 1500, // Meta agressiva de 1.5s
+          maxInteractionTime: 50, // Reduzido para 50ms
+          maxComponentCount: 100, // Reduzido para forçar otimização
         }}
       >
         <QueryClientProvider client={queryClient}>

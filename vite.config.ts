@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -42,7 +43,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Configurações básicas de otimização
+    // Configurações agressivas de otimização
     target: 'es2020',
     minify: mode === 'production' ? 'terser' : false,
     cssCodeSplit: true,
@@ -52,6 +53,8 @@ export default defineConfig(({ mode }) => ({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        dead_code: true,
+        unused: true,
       },
       mangle: {
         safari10: true,
@@ -59,39 +62,63 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        // Chunking automático simples
+        // Chunking otimizado baseado em grupos funcionais
         manualChunks: (id) => {
-          // Vendor chunk para node_modules
+          // React ecosystem
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            return 'vendor-react';
+          }
+          
+          // UI components
+          if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+            return 'vendor-ui';
+          }
+          
+          // Charts (chunk separado para lazy loading)
+          if (id.includes('recharts')) {
+            return 'vendor-charts';
+          }
+          
+          // Supabase
+          if (id.includes('@supabase') || id.includes('@tanstack/react-query')) {
+            return 'vendor-data';
+          }
+          
+          // Páginas críticas juntas
+          if (id.includes('pages/Dashboard') || id.includes('pages/Activities') || id.includes('pages/Projects')) {
+            return 'pages-critical';
+          }
+          
+          // Páginas operacionais
+          if (id.includes('pages/DashboardOPs') || id.includes('pages/OrdemProducao') || id.includes('pages/MinhasTarefas')) {
+            return 'pages-operational';
+          }
+          
+          // Páginas financeiras
+          if (id.includes('pages/Cost') || id.includes('pages/Revenue') || id.includes('pages/Financial')) {
+            return 'pages-financial';
+          }
+          
+          // Outras dependências
           if (id.includes('node_modules')) {
-            // React ecosystem
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor-react';
-            }
-            // UI components
-            if (id.includes('@radix-ui') || id.includes('lucide-react')) {
-              return 'vendor-ui';
-            }
-            // Charts
-            if (id.includes('recharts')) {
-              return 'vendor-charts';
-            }
-            // Other vendor packages
             return 'vendor';
           }
         },
         
-        // Naming strategy para chunks
-        chunkFileNames: 'assets/[name]-[hash].js',
+        // Estratégia de naming otimizada
+        chunkFileNames: (chunkInfo) => {
+          return `assets/[name]-[hash].js`;
+        },
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
     
-    // Configurações de chunk size
-    chunkSizeWarningLimit: 500,
+    // Configurações de chunk size mais agressivas
+    chunkSizeWarningLimit: 300, // Reduzido para forçar otimização
   },
   
-  // Otimizações de dependências
+  // Otimizações agressivas de dependências
   optimizeDeps: {
     include: [
       'react',
@@ -99,16 +126,23 @@ export default defineConfig(({ mode }) => ({
       'react-router-dom',
       '@tanstack/react-query',
       'lucide-react',
-      'date-fns',
-      'recharts',
+      'date-fns/format',
+      'date-fns/parseISO',
     ],
     exclude: [
-      // Excluir dependências que devem ser carregadas sob demanda
+      'recharts', // Lazy load para performance
     ],
+    force: true, // Forçar re-otimização
   },
   
   // CSS optimizations
   css: {
     devSourcemap: false,
+    modules: {
+      generateScopedName: '[hash:base64:5]', // Nomes mais curtos
+    },
   },
+  
+  // Cache estratégico
+  cacheDir: 'node_modules/.vite',
 }));

@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import { useGlobalState } from "@/hooks/useGlobalState";
+import { usePerformanceOptimizedCache } from "@/hooks/usePerformanceOptimizedCache";
 
 interface GlobalStateContextType {
   prefetchCommonData: () => Promise<void>;
@@ -28,11 +29,18 @@ const GlobalStateContext = createContext<GlobalStateContextType | undefined>(und
 
 export const GlobalStateProvider = ({ children }: { children: React.ReactNode }) => {
   const globalState = useGlobalState();
+  const performanceCache = usePerformanceOptimizedCache();
 
-  // Prefetch dados comuns na inicialização
+  // Prefetch dados comuns na inicialização com cache otimizado
   useEffect(() => {
-    globalState.prefetchCommonData();
-  }, [globalState.prefetchCommonData]);
+    // Usar cache otimizado primeiro, depois prefetch
+    performanceCache.restorePersistedCache();
+    
+    // Delay para não bloquear o carregamento inicial
+    setTimeout(() => {
+      globalState.prefetchCommonData();
+    }, 500);
+  }, [globalState.prefetchCommonData, performanceCache]);
 
   const contextValue: GlobalStateContextType = {
     prefetchCommonData: globalState.prefetchCommonData,
@@ -41,7 +49,10 @@ export const GlobalStateProvider = ({ children }: { children: React.ReactNode })
     invalidateActivityRelated: globalState.invalidateActivityRelated,
     invalidateProjectRelated: globalState.invalidateProjectRelatedQueries,
     getCachedData: globalState.getCachedData,
-    cleanupCache: globalState.cleanupCache,
+    cleanupCache: () => {
+      globalState.cleanupCache();
+      performanceCache.aggressiveCacheCleanup();
+    },
     cacheMetrics: globalState.cacheMetrics,
   };
 
