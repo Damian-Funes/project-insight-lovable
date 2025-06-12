@@ -235,6 +235,69 @@ export type Database = {
           },
         ]
       }
+      ordem_producao: {
+        Row: {
+          area_responsavel_id: string
+          created_at: string
+          data_fim_prevista: string
+          data_fim_real: string | null
+          data_inicio_prevista: string
+          data_inicio_real: string | null
+          descricao_op: string
+          id: string
+          numero_op: string
+          observacoes: string | null
+          projeto_id: string
+          status_op: string
+          updated_at: string
+        }
+        Insert: {
+          area_responsavel_id: string
+          created_at?: string
+          data_fim_prevista: string
+          data_fim_real?: string | null
+          data_inicio_prevista: string
+          data_inicio_real?: string | null
+          descricao_op: string
+          id?: string
+          numero_op: string
+          observacoes?: string | null
+          projeto_id: string
+          status_op?: string
+          updated_at?: string
+        }
+        Update: {
+          area_responsavel_id?: string
+          created_at?: string
+          data_fim_prevista?: string
+          data_fim_real?: string | null
+          data_inicio_prevista?: string
+          data_inicio_real?: string | null
+          descricao_op?: string
+          id?: string
+          numero_op?: string
+          observacoes?: string | null
+          projeto_id?: string
+          status_op?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordem_producao_area_responsavel_id_fkey"
+            columns: ["area_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "areas_produtivas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordem_producao_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           area_id: string | null
