@@ -79,8 +79,8 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-charts';
           }
           
-          // Supabase
-          if (id.includes('@supabase') || id.includes('@tanstack/react-query')) {
+          // Supabase e state management
+          if (id.includes('@supabase') || id.includes('@tanstack/react-query') || id.includes('zustand') || id.includes('immer')) {
             return 'vendor-data';
           }
           
@@ -128,6 +128,8 @@ export default defineConfig(({ mode }) => ({
       'lucide-react',
       'date-fns/format',
       'date-fns/parseISO',
+      'zustand',
+      'immer', // Incluir explicitamente o immer
     ],
     exclude: [
       'recharts', // Lazy load para performance
