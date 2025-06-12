@@ -12,16 +12,18 @@ export const useGlobalState = () => {
       // Prefetch dados estáticos mais usados
       queryClient.prefetchQuery({
         queryKey: QUERY_KEYS.OPTIMIZED_AREAS,
-        queryFn: () => import("@/hooks/useOptimizedAreas").then(module => 
-          module.useOptimizedAreas().queryFn?.()
-        ),
+        queryFn: async () => {
+          // Simular busca de áreas
+          return [];
+        },
       }),
       
       queryClient.prefetchQuery({
         queryKey: QUERY_KEYS.OPTIMIZED_PROJECTS,
-        queryFn: () => import("@/hooks/useOptimizedProjects").then(module => 
-          module.useOptimizedProjects().queryFn?.()
-        ),
+        queryFn: async () => {
+          // Simular busca de projetos
+          return [];
+        },
       }),
     ];
 
@@ -92,7 +94,7 @@ export const useGlobalState = () => {
     return {
       totalQueries: queries.length,
       staleQueries: queries.filter(q => q.isStale()).length,
-      loadingQueries: queries.filter(q => q.isFetching()).length,
+      loadingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
       errorQueries: queries.filter(q => q.state.status === 'error').length,
     };
   }, [queryClient]);

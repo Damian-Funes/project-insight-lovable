@@ -47,14 +47,14 @@ export const useRoutePrefetching = () => {
     prefetchKeys.forEach(queryKey => {
       // Verificar se os dados já estão no cache e são válidos
       const queryState = queryClient.getQueryState(queryKey);
-      const isStale = !queryState || queryState.isStale;
+      const shouldPrefetch = !queryState || queryState.dataUpdatedAt < (Date.now() - (5 * 60 * 1000));
 
-      if (isStale) {
+      if (shouldPrefetch) {
         // Configurar prefetch baseado no tipo de dados
-        let config = QUERY_CONFIGS.DYNAMIC;
+        let config = QUERY_CONFIGS.ACTIVITIES;
         
         if (queryKey.includes('areas') || queryKey.includes('projects')) {
-          config = QUERY_CONFIGS.STATIC;
+          config = QUERY_CONFIGS.AREAS;
         } else if (queryKey.includes('dashboard') || queryKey.includes('costs')) {
           config = QUERY_CONFIGS.DASHBOARD;
         }
@@ -65,13 +65,10 @@ export const useRoutePrefetching = () => {
           queryFn: async () => {
             // Implementação dinâmica baseada na queryKey
             if (queryKey === QUERY_KEYS.OPTIMIZED_AREAS) {
-              const { useOptimizedAreas } = await import("@/hooks/useOptimizedAreas");
-              // Simular chamada do hook (em produção seria melhor ter uma função separada)
               return [];
             }
             
             if (queryKey === QUERY_KEYS.OPTIMIZED_PROJECTS) {
-              const { useOptimizedProjects } = await import("@/hooks/useOptimizedProjects");
               return [];
             }
 
@@ -96,12 +93,12 @@ export const useRoutePrefetching = () => {
           
           prefetchKeys?.forEach(queryKey => {
             const queryState = queryClient.getQueryState(queryKey);
-            const isStale = !queryState || queryState.isStale;
+            const shouldPrefetch = !queryState || queryState.dataUpdatedAt < (Date.now() - (10 * 60 * 1000));
             
-            if (isStale) {
+            if (shouldPrefetch) {
               queryClient.prefetchQuery({
                 queryKey,
-                staleTime: QUERY_CONFIGS.STATIC.staleTime,
+                staleTime: QUERY_CONFIGS.AREAS.staleTime,
                 queryFn: async () => [], // Implementação simplificada
               });
             }

@@ -32,7 +32,7 @@ export const CacheMonitor = () => {
       setCacheStats({
         totalQueries: queries.length,
         staleQueries: queries.filter(q => q.isStale()).length,
-        loadingQueries: queries.filter(q => q.isFetching()).length,
+        loadingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
         errorQueries: queries.filter(q => q.state.status === 'error').length,
         cacheSize: queries.reduce((size, query) => {
           const dataSize = query.state.data 
