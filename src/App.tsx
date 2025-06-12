@@ -12,6 +12,7 @@ import Projects from "./pages/Projects";
 import Areas from "./pages/Areas";
 import AreaManagement from "./pages/AreaManagement";
 import Reports from "./pages/Reports";
+import CostDashboard from "./pages/CostDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/areas" element={<Areas />} />
                 <Route path="/area-management" element={<AreaManagement />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/cost-dashboard" element={<CostDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
