@@ -2,20 +2,20 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useProjects } from "@/hooks/useProjects";
-import { useAreas } from "@/hooks/useAreas";
-import { OPFilters } from "@/hooks/useOPsDashboard";
+import { useOptimizedProjects } from "@/hooks/useOptimizedProjects";
+import { useOptimizedAreas } from "@/hooks/useOptimizedAreas";
+import { OptimizedOPFilters } from "@/hooks/useOptimizedOPsDashboard";
 
 interface OPsDashboardFiltersProps {
-  filters: OPFilters;
-  onFiltersChange: (filters: OPFilters) => void;
+  filters: OptimizedOPFilters;
+  onFiltersChange: (filters: OptimizedOPFilters) => void;
 }
 
 export const OPsDashboardFilters = ({ filters, onFiltersChange }: OPsDashboardFiltersProps) => {
-  const { data: projects } = useProjects();
-  const { data: areas } = useAreas();
+  const { data: projects } = useOptimizedProjects();
+  const { data: areas } = useOptimizedAreas();
 
-  const updateFilter = (key: keyof OPFilters, value: string) => {
+  const updateFilter = (key: keyof OptimizedOPFilters, value: string) => {
     onFiltersChange({
       ...filters,
       [key]: value === "all" ? undefined : value,
