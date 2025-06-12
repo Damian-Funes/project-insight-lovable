@@ -60,18 +60,16 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        // Estratégia de chunking otimizada
+        // Estratégia de chunking otimizada e simplificada
         manualChunks: {
           // Vendor principal - React e dependências core
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           
-          // UI Library - Radix UI e Tailwind
+          // UI Library - Componentes Radix que realmente existem
           'ui-vendor': [
             '@radix-ui/react-accordion',
             '@radix-ui/react-alert-dialog',
             '@radix-ui/react-avatar',
-            '@radix-ui/react-button',
-            '@radix-ui/react-card',
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-label',
@@ -103,14 +101,7 @@ export default defineConfig(({ mode }) => ({
         },
         
         // Naming strategy para chunks
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId
-            ? chunkInfo.facadeModuleId.split('/').pop()?.replace(/\.\w+$/, '')
-            : 'chunk';
-          
-          return `assets/[name]-[hash].js`;
-        },
-        
+        chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.') || [];
