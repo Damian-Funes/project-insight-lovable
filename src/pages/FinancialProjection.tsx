@@ -1,15 +1,16 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ProjectionChart } from "@/components/ProjectionChart";
-import { EditableProjectionTable } from "@/components/EditableProjectionTable";
+import { OptimizedProjectionChart } from "@/components/OptimizedProjectionChart";
+import { OptimizedEditableProjectionTable } from "@/components/OptimizedEditableProjectionTable";
 import { useFinancialProjection } from "@/hooks/useFinancialProjection";
 import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const FinancialProjection = () => {
+const FinancialProjection = React.memo(() => {
   const [analysisMonths, setAnalysisMonths] = useState<number>(6);
   const [projectionHorizon, setProjectionHorizon] = useState<number>(6);
   const [costAdjustments, setCostAdjustments] = useState<{ [key: string]: number }>({});
@@ -20,26 +21,15 @@ const FinancialProjection = () => {
     projectionHorizon
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger />
-          <h1 className="text-3xl font-bold tracking-tight">Previsão Financeira</h1>
-        </div>
-        <div className="flex items-center justify-center h-96">
-          <div className="text-muted-foreground">Carregando projeções...</div>
-        </div>
-      </div>
-    );
-  }
+  const projectionData = projectionResult?.data || [];
+  const averages = projectionResult?.averages || { monthlyCost: 0, monthlyRevenue: 0 };
 
   if (error) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
-          <h1 className="text-3xl font-bold tracking-tight">Previsão Financeira</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Projeção Financeira</h1>
         </div>
         <div className="flex items-center justify-center h-96">
           <div className="text-destructive">Erro ao carregar dados de projeção</div>
@@ -48,21 +38,18 @@ const FinancialProjection = () => {
     );
   }
 
-  const projectionData = projectionResult?.data || [];
-  const averages = projectionResult?.averages || { monthlyCost: 0, monthlyRevenue: 0 };
-
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
       <div className="flex items-center gap-2">
         <SidebarTrigger />
-        <h1 className="text-3xl font-bold tracking-tight">Previsão Financeira</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Projeção Financeira</h1>
       </div>
 
       {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BarChart3 className="h-4 w-4" />
             Configurações de Projeção
           </CardTitle>
         </CardHeader>
@@ -107,12 +94,18 @@ const FinancialProjection = () => {
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              R$ {averages.monthlyCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Baseado nos últimos {analysisMonths} meses
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <>
+                <div className="text-xl font-bold text-red-600">
+                  R$ {averages.monthlyCost.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Baseado nos últimos {analysisMonths} meses
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -122,12 +115,18 @@ const FinancialProjection = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              R$ {averages.monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Baseado nos últimos {analysisMonths} meses
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <>
+                <div className="text-xl font-bold text-green-600">
+                  R$ {averages.monthlyRevenue.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Baseado nos últimos {analysisMonths} meses
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -135,54 +134,72 @@ const FinancialProjection = () => {
       {/* Seção de Projeção de Custos */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-700">
-            <TrendingDown className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-red-700 text-lg">
+            <TrendingDown className="h-4 w-4" />
             Projeção de Custos
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <ProjectionChart 
-            data={projectionData} 
-            title="Tendência e Projeção de Custos"
-            type="costs"
-            adjustments={costAdjustments}
-          />
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <Skeleton className="h-[350px] w-full" />
+          ) : (
+            <OptimizedProjectionChart 
+              data={projectionData} 
+              title="Tendência e Projeção de Custos"
+              type="costs"
+              adjustments={costAdjustments}
+            />
+          )}
           <Separator />
-          <EditableProjectionTable 
-            data={projectionData}
-            title="Custos"
-            type="custos"
-            onProjectionChange={setCostAdjustments}
-          />
+          {isLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <OptimizedEditableProjectionTable 
+              data={projectionData}
+              title="Custos"
+              type="custos"
+              onProjectionChange={setCostAdjustments}
+            />
+          )}
         </CardContent>
       </Card>
 
       {/* Seção de Projeção de Receitas */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-700">
-            <TrendingUp className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-green-700 text-lg">
+            <TrendingUp className="h-4 w-4" />
             Projeção de Receitas
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <ProjectionChart 
-            data={projectionData} 
-            title="Tendência e Projeção de Receitas"
-            type="revenues"
-            adjustments={revenueAdjustments}
-          />
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <Skeleton className="h-[350px] w-full" />
+          ) : (
+            <OptimizedProjectionChart 
+              data={projectionData} 
+              title="Tendência e Projeção de Receitas"
+              type="revenues"
+              adjustments={revenueAdjustments}
+            />
+          )}
           <Separator />
-          <EditableProjectionTable 
-            data={projectionData}
-            title="Receitas"
-            type="receitas"
-            onProjectionChange={setRevenueAdjustments}
-          />
+          {isLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <OptimizedEditableProjectionTable 
+              data={projectionData}
+              title="Receitas"
+              type="receitas"
+              onProjectionChange={setRevenueAdjustments}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
   );
-};
+});
+
+FinancialProjection.displayName = "FinancialProjection";
 
 export default FinancialProjection;

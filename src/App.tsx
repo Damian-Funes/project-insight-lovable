@@ -10,23 +10,23 @@ import { ProtectedLayout } from "@/components/ProtectedLayout";
 import Index from "@/pages/Index";
 import { DashboardSkeleton, TableSkeleton } from "@/components/ui/optimized-loading";
 
-// Lazy loading otimizado - páginas financeiras
+// Lazy loading otimizado - apenas páginas pesadas
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const CostDashboard = React.lazy(() => import("@/pages/CostDashboard"));
 const FinancialProjection = React.lazy(() => import("@/pages/FinancialProjection"));
-
-// Páginas de gestão - import direto
-const Areas = React.lazy(() => import("@/pages/Areas"));
-const AreaManagement = React.lazy(() => import("@/pages/AreaManagement"));
-const RevenueManagement = React.lazy(() => import("@/pages/RevenueManagement"));
 const ScenarioAnalysis = React.lazy(() => import("@/pages/ScenarioAnalysis"));
-const Reports = React.lazy(() => import("@/pages/Reports"));
-const NotFound = React.lazy(() => import("@/pages/NotFound"));
 
-// Diferentes skeletons para diferentes tipos de página
+// Páginas leves - import direto para melhor performance
+import Areas from "@/pages/Areas";
+import AreaManagement from "@/pages/AreaManagement";
+import RevenueManagement from "@/pages/RevenueManagement";
+import Reports from "@/pages/Reports";
+import NotFound from "@/pages/NotFound";
+
+// Diferentes skeletons otimizados
 const DashboardLoader = () => <DashboardSkeleton />;
 const TableLoader = () => (
-  <div className="p-6">
+  <div className="p-4">
     <TableSkeleton />
   </div>
 );
@@ -35,10 +35,12 @@ function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutos
-        gcTime: 10 * 60 * 1000, // 10 minutos
+        staleTime: 10 * 60 * 1000, // 10 minutos - mais agressivo
+        gcTime: 30 * 60 * 1000, // 30 minutos
         refetchOnWindowFocus: false,
-        retry: 1, // Reduzir tentativas para melhor UX
+        retry: 1,
+        // Preload estratégico para dados frequentemente acessados
+        refetchOnMount: false,
       },
     },
   });
@@ -78,30 +80,6 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="areas" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <Areas />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="area-management" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <AreaManagement />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="revenue-management" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <RevenueManagement />
-                    </Suspense>
-                  } 
-                />
-                <Route 
                   path="scenario-analysis" 
                   element={
                     <Suspense fallback={<DashboardLoader />}>
@@ -109,22 +87,12 @@ function App() {
                     </Suspense>
                   } 
                 />
-                <Route 
-                  path="reports" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <Reports />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="*" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <NotFound />
-                    </Suspense>
-                  } 
-                />
+                {/* Páginas leves sem lazy loading */}
+                <Route path="areas" element={<Areas />} />
+                <Route path="area-management" element={<AreaManagement />} />
+                <Route path="revenue-management" element={<RevenueManagement />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
           </BrowserRouter>
