@@ -26,20 +26,29 @@ export const QUERY_KEYS = {
   OPTIMIZED_PROJECTS: ['projects', 'optimized'] as const,
 } as const;
 
-// Padrões de invalidação
+// Padrões de invalidação com tipos mais simples
 export const INVALIDATION_PATTERNS = {
-  ACTIVITIES_ALL: () => [QUERY_KEYS.ACTIVITIES_ALL, QUERY_KEYS.ACTIVITIES_PAGINATED],
-  PROJECTS_ALL: () => [QUERY_KEYS.PROJECTS_ALL],
-  AREAS_ALL: () => [QUERY_KEYS.AREAS_ALL],
-  DASHBOARDS_ALL: () => [QUERY_KEYS.DASHBOARDS_ALL],
+  ACTIVITIES_ALL: () => [
+    QUERY_KEYS.ACTIVITIES_ALL,
+    QUERY_KEYS.ACTIVITIES_PAGINATED,
+  ],
+  PROJECTS_ALL: () => [
+    QUERY_KEYS.PROJECTS_ALL,
+  ],
+  AREAS_ALL: () => [
+    QUERY_KEYS.AREAS_ALL,
+  ],
+  DASHBOARDS_ALL: () => [
+    QUERY_KEYS.DASHBOARDS_ALL,
+  ],
   PROJECT_RELATED: (projectId: string) => [
-    ['projects', projectId],
-    ['activities', { projeto_id: projectId }],
+    ['projects', projectId] as const,
+    ['activities', { projeto_id: projectId }] as const,
     QUERY_KEYS.DASHBOARDS_ALL,
   ],
   AREA_RELATED: (areaId: string) => [
-    ['areas', areaId],
-    ['activities', { area_id: areaId }],
+    ['areas', areaId] as const,
+    ['activities', { area_id: areaId }] as const,
     QUERY_KEYS.DASHBOARDS_ALL,
   ],
 } as const;
