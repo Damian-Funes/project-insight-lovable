@@ -1,4 +1,5 @@
 
+import React, { useMemo, useCallback, useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useCreateProject, useUpdateProject, useDeleteProject } from "@/hooks/useProjectMutations";
 import { ProjectFormModal, type ProjectFormData } from "@/components/ProjectFormModal";
-import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Projects = () => {
   const { data: projects, isLoading, error } = useProjects();
@@ -20,42 +21,42 @@ const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case "Ativo": return "bg-chart-primary/10 text-chart-primary border-chart-primary";
       case "Concluído": return "bg-metric-profit/10 text-metric-profit border-metric-profit";
       case "Cancelado": return "bg-metric-cost/10 text-metric-cost border-metric-cost";
       default: return "bg-muted/10 text-muted-foreground border-border";
     }
-  };
+  }, []);
 
-  const formatCurrency = (value: number) => {
+  const formatCurrency = useCallback((value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     if (!dateString) return "Não definido";
     return new Date(dateString).toLocaleDateString('pt-BR');
-  };
+  }, []);
 
-  const handleCreateProject = () => {
+  const handleCreateProject = useCallback(() => {
     setEditingProject(null);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleEditProject = (project: any) => {
+  const handleEditProject = useCallback((project: any) => {
     setEditingProject({
       ...project,
       data_inicio: project.data_inicio ? new Date(project.data_inicio) : undefined,
       data_termino_prevista: project.data_termino_prevista ? new Date(project.data_termino_prevista) : undefined,
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleSubmit = async (data: ProjectFormData) => {
+  const handleSubmit = useCallback(async (data: ProjectFormData) => {
     try {
       if (editingProject) {
         await updateProject.mutateAsync({ id: editingProject.id, data });
@@ -67,23 +68,46 @@ const Projects = () => {
     } catch (error) {
       console.error("Erro ao salvar projeto:", error);
     }
-  };
+  }, [editingProject, updateProject, createProject]);
 
-  const handleDeleteProject = async (id: string) => {
+  const handleDeleteProject = useCallback(async (id: string) => {
     try {
       await deleteProject.mutateAsync(id);
     } catch (error) {
       console.error("Erro ao excluir projeto:", error);
     }
-  };
+  }, [deleteProject]);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setEditingProject(null);
+  }, []);
 
   if (isLoading) {
     return (
       <div className="flex-1 space-y-6 p-6">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-chart-primary" />
-          <span className="ml-2 text-muted-foreground">Carregando projetos...</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <SidebarTrigger />
+            <div>
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-32" />
         </div>
+        <Card className="metric-card">
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -218,7 +242,7 @@ const Projects = () => {
 
       <ProjectFormModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={handleModalClose}
         onSubmit={handleSubmit}
         initialData={editingProject}
         isLoading={createProject.isPending || updateProject.isPending}

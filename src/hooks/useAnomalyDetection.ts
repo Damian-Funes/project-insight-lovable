@@ -30,6 +30,9 @@ export const useAnomalyDetection = () => {
       return data || [];
     },
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 15 * 60 * 1000, // 15 minutos
+    refetchOnWindowFocus: false,
   });
 
   const runDetection = useMutation({

@@ -21,5 +21,8 @@ export const useAreas = () => {
       console.log("Áreas encontradas:", data);
       return data || [];
     },
+    staleTime: 10 * 60 * 1000, // 10 minutos (areas mudam pouco)
+    gcTime: 30 * 60 * 1000, // 30 minutos
+    refetchOnWindowFocus: false,
   });
 };
