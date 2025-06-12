@@ -8,7 +8,6 @@ import { AreaCostTable } from "@/components/AreaCostTable";
 import { ProfitabilityChart } from "@/components/ProfitabilityChart";
 import { ProfitabilityTable } from "@/components/ProfitabilityTable";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
-import { ProjectFilter } from "@/components/ProjectFilter";
 import { AreaFilter } from "@/components/AreaFilter";
 import { useCostsByProject } from "@/hooks/useCostsByProject";
 import { useCostsByArea } from "@/hooks/useCostsByArea";
@@ -19,13 +18,11 @@ import { Button } from "@/components/ui/button";
 const CostDashboard = () => {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedArea, setSelectedArea] = useState<string>("all");
 
   const projectFilters = {
     startDate,
     endDate,
-    projectId: selectedProject,
   };
 
   const areaFilters = {
@@ -37,7 +34,6 @@ const CostDashboard = () => {
   const profitabilityFilters = {
     startDate,
     endDate,
-    projectId: selectedProject,
   };
 
   const { data: costData, isLoading: isLoadingProjects, error: projectError } = useCostsByProject(projectFilters);
@@ -47,7 +43,6 @@ const CostDashboard = () => {
   const clearFilters = () => {
     setStartDate(undefined);
     setEndDate(undefined);
-    setSelectedProject("all");
     setSelectedArea("all");
   };
 
@@ -91,10 +86,10 @@ const CostDashboard = () => {
         <TrendingUp className="h-8 w-8 text-chart-primary" />
         <div>
           <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-chart-primary to-chart-secondary bg-clip-text text-transparent">
-            Dashboards de Custos & Rentabilidade
+            Dashboard de Custos & Rentabilidade
           </h2>
           <p className="text-muted-foreground">
-            Análise detalhada dos custos e rentabilidade por projeto e área produtiva
+            Análise detalhada dos custos e rentabilidade por área produtiva
           </p>
         </div>
       </div>
@@ -121,10 +116,6 @@ const CostDashboard = () => {
                 onEndDateChange={setEndDate}
               />
             </div>
-            <ProjectFilter
-              selectedProject={selectedProject}
-              onProjectChange={setSelectedProject}
-            />
             <AreaFilter
               selectedArea={selectedArea}
               onAreaChange={setSelectedArea}
@@ -154,7 +145,7 @@ const CostDashboard = () => {
               R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total de receitas dos projetos
+              Total de receitas
             </p>
           </CardContent>
         </Card>
@@ -170,7 +161,7 @@ const CostDashboard = () => {
               R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total de custos dos projetos
+              Total de custos
             </p>
           </CardContent>
         </Card>
@@ -213,10 +204,10 @@ const CostDashboard = () => {
         <CardHeader>
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-chart-accent" />
-            <CardTitle className="text-xl">Rentabilidade por Projeto</CardTitle>
+            <CardTitle className="text-xl">Rentabilidade Geral</CardTitle>
           </div>
           <CardDescription>
-            Comparação entre receita, custo e lucro/prejuízo por projeto
+            Comparação entre receita, custo e lucro/prejuízo geral
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -227,7 +218,7 @@ const CostDashboard = () => {
               <div className="text-center">
                 <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg">Nenhum dado de rentabilidade disponível</p>
-                <p className="text-sm">Ajuste os filtros ou verifique se há receitas e atividades registradas</p>
+                <p className="text-sm">Ajuste os filtros ou verifique se há receitas registradas</p>
               </div>
             </div>
           )}
@@ -240,7 +231,7 @@ const CostDashboard = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-chart-primary" />
-              <CardTitle className="text-xl">Análise de Custos por Projeto</CardTitle>
+              <CardTitle className="text-xl">Análise de Custos Geral</CardTitle>
             </div>
             <CardDescription>
               Distribuição dos custos totais baseada nas horas registradas e custo/hora das áreas
@@ -294,10 +285,10 @@ const CostDashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-chart-accent" />
-              Detalhamento - Rentabilidade por Projeto
+              Detalhamento - Rentabilidade Geral
             </CardTitle>
             <CardDescription>
-              Valores detalhados de receita, custo, lucro e margem de lucro por projeto
+              Valores detalhados de receita, custo, lucro e margem de lucro
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -311,10 +302,10 @@ const CostDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-chart-primary" />
-                Detalhamento - Custos por Projeto
+                Detalhamento - Custos Gerais
               </CardTitle>
               <CardDescription>
-                Valores detalhados dos custos calculados por projeto
+                Valores detalhados dos custos calculados
               </CardDescription>
             </CardHeader>
             <CardContent>

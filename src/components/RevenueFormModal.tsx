@@ -27,14 +27,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useProjects } from "@/hooks/useProjects";
 import { useRevenueMutations } from "@/hooks/useRevenueMutations";
 import { Textarea } from "@/components/ui/textarea";
 
 const revenueSchema = z.object({
   data_receita: z.string().min(1, "Data da receita é obrigatória"),
   valor_receita: z.string().min(1, "Valor da receita é obrigatório"),
-  projeto_id: z.string().min(1, "Projeto é obrigatório"),
   descricao_receita: z.string().optional(),
   tipo_receita: z.string().optional(),
 });
@@ -48,7 +46,7 @@ interface RevenueFormModalProps {
 }
 
 const revenueTypes = [
-  "Pagamento de Projeto",
+  "Receita de Serviços",
   "Receita Recorrente",
   "Consultoria",
   "Licenciamento",
@@ -57,7 +55,6 @@ const revenueTypes = [
 
 export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: projects } = useProjects();
   const { createRevenue, updateRevenue } = useRevenueMutations();
 
   const form = useForm<RevenueFormData>({
@@ -65,7 +62,6 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
     defaultValues: {
       data_receita: "",
       valor_receita: "",
-      projeto_id: "",
       descricao_receita: "",
       tipo_receita: "",
     },
@@ -76,7 +72,6 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
       form.reset({
         data_receita: revenue.data_receita,
         valor_receita: revenue.valor_receita.toString(),
-        projeto_id: revenue.projeto_id,
         descricao_receita: revenue.descricao_receita || "",
         tipo_receita: revenue.tipo_receita || "",
       });
@@ -84,7 +79,6 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
       form.reset({
         data_receita: "",
         valor_receita: "",
-        projeto_id: "",
         descricao_receita: "",
         tipo_receita: "",
       });
@@ -97,7 +91,6 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
       const revenueData = {
         data_receita: data.data_receita,
         valor_receita: parseFloat(data.valor_receita),
-        projeto_id: data.projeto_id,
         descricao_receita: data.descricao_receita,
         tipo_receita: data.tipo_receita,
       };
@@ -160,31 +153,6 @@ export const RevenueFormModal = ({ open, onOpenChange, revenue }: RevenueFormMod
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="projeto_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Projeto</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um projeto" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {projects?.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.nome_projeto}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

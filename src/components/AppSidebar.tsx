@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, BarChart3, Users, Building2, DollarSign, TrendingUp, Bell, Settings } from "lucide-react";
+import { Home, BarChart3, Building2, DollarSign, TrendingUp, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -48,22 +48,17 @@ const items = [
   {
     title: "Áreas Produtivas",
     url: "/areas",
-    icon: Users,
+    icon: Building2,
   },
   {
     title: "Gestão de Áreas",
     url: "/area-management",
-    icon: Settings,
+    icon: Building2,
   },
   {
     title: "Relatórios",
     url: "/reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Configuração de Alertas",
-    url: "/alerts-configuration",
-    icon: Bell,
+    icon: FileText,
   },
 ];
 

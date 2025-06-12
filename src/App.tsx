@@ -20,7 +20,6 @@ const Areas = React.lazy(() => import("@/pages/Areas"));
 const AreaManagement = React.lazy(() => import("@/pages/AreaManagement"));
 const RevenueManagement = React.lazy(() => import("@/pages/RevenueManagement"));
 const ScenarioAnalysis = React.lazy(() => import("@/pages/ScenarioAnalysis"));
-const AlertsConfiguration = React.lazy(() => import("@/pages/AlertsConfiguration"));
 const Reports = React.lazy(() => import("@/pages/Reports"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 
@@ -107,14 +106,6 @@ function App() {
                   element={
                     <Suspense fallback={<DashboardLoader />}>
                       <ScenarioAnalysis />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="alerts-configuration" 
-                  element={
-                    <Suspense fallback={<TableLoader />}>
-                      <AlertsConfiguration />
                     </Suspense>
                   } 
                 />
