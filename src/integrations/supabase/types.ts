@@ -42,6 +42,60 @@ export type Database = {
         }
         Relationships: []
       }
+      alertas_operacionais: {
+        Row: {
+          area_id: string | null
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          data_fim: string | null
+          data_inicio: string
+          id: string
+          mensagem: string
+          prioridade: number
+          updated_at: string
+        }
+        Insert: {
+          area_id?: string | null
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          id?: string
+          mensagem: string
+          prioridade?: number
+          updated_at?: string
+        }
+        Update: {
+          area_id?: string | null
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          id?: string
+          mensagem?: string
+          prioridade?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alertas_operacionais_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas_produtivas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_operacionais_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas_produtivas: {
         Row: {
           created_at: string

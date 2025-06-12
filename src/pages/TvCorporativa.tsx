@@ -7,6 +7,7 @@ import { useActiveProjectsCount } from "@/hooks/useActiveProjectsCount";
 import { TvHeader } from "@/components/tv/TvHeader";
 import { TvWelcomeCard } from "@/components/tv/TvWelcomeCard";
 import { TvSectionIndicator } from "@/components/tv/TvSectionIndicator";
+import { OperationalAlertsSection } from "@/components/tv/sections/OperationalAlertsSection";
 import { ReworkSection } from "@/components/tv/sections/ReworkSection";
 import { ProjectsSection } from "@/components/tv/sections/ProjectsSection";
 import { TimeMetricsSection } from "@/components/tv/sections/TimeMetricsSection";
@@ -50,6 +51,13 @@ const TvCorporativa = () => {
     const currentSectionData = TV_SECTIONS[currentSection];
     
     switch (currentSectionData.id) {
+      case 'alerts':
+        return (
+          <OperationalAlertsSection 
+            areaId={selectedArea}
+          />
+        );
+
       case 'rework':
         return (
           <ReworkSection 

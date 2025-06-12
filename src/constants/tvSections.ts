@@ -1,8 +1,13 @@
 
-import { RotateCcw, FolderOpen, Clock, Activity, TrendingUp } from "lucide-react";
+import { RotateCcw, FolderOpen, Clock, Activity, TrendingUp, Bell } from "lucide-react";
 import { TvSection } from "@/types/tv";
 
 export const TV_SECTIONS: TvSection[] = [
+  {
+    id: 'alerts',
+    title: 'Alertas Operacionais',
+    icon: Bell,
+  },
   {
     id: 'rework',
     title: 'Indicadores de Retrabalho',
