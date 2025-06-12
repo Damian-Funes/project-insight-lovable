@@ -4,9 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster"
 import Auth from "@/pages/Auth";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { AppSidebar } from "@/components/AppSidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { ProtectedLayout } from "@/components/ProtectedLayout";
 import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
@@ -34,34 +32,22 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <SidebarProvider>
-                      <AppSidebar />
-                      <SidebarInset>
-                        <Routes>
-                          <Route index element={<Index />} />
-                          <Route path="dashboard" element={<Dashboard />} />
-                          <Route path="projects" element={<Projects />} />
-                          <Route path="areas" element={<Areas />} />
-                          <Route path="area-management" element={<AreaManagement />} />
-                          <Route path="activities" element={<Activities />} />
-                          <Route path="revenue-management" element={<RevenueManagement />} />
-                          <Route path="cost-dashboard" element={<CostDashboard />} />
-                          <Route path="financial-projection" element={<FinancialProjection />} />
-                          <Route path="scenario-analysis" element={<ScenarioAnalysis />} />
-                          <Route path="predictive-models" element={<PredictiveModels />} />
-                          <Route path="alerts-configuration" element={<AlertsConfiguration />} />
-                          <Route path="reports" element={<Reports />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </SidebarInset>
-                    </SidebarProvider>
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<ProtectedLayout />}>
+                <Route index element={<Index />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="projects" element={<Projects />} />
+                <Route path="areas" element={<Areas />} />
+                <Route path="area-management" element={<AreaManagement />} />
+                <Route path="activities" element={<Activities />} />
+                <Route path="revenue-management" element={<RevenueManagement />} />
+                <Route path="cost-dashboard" element={<CostDashboard />} />
+                <Route path="financial-projection" element={<FinancialProjection />} />
+                <Route path="scenario-analysis" element={<ScenarioAnalysis />} />
+                <Route path="predictive-models" element={<PredictiveModels />} />
+                <Route path="alerts-configuration" element={<AlertsConfiguration />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
